@@ -35,18 +35,19 @@ if(USE_EIGEN3)
 endif()
 
 # -- Flora Nav-DR (Dead Reckoning)
-# add_library(flora_nav-dr
-#     # nav-dr/...
-# )
+add_library(flora_nav-dr
+    nav-dr/sensors/GPSData.cpp
+    nav-dr/sensors/IMUData.cpp
+    nav-dr/sensors/SensorData.cpp
+)
 
-# target_include_directories(flora_nav-dr
-#     PUBLIC 
-#         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-#         $<INSTALL_INTERFACE:include>
-#     PRIVATE
-#         ${CMAKE_CURRENT_SOURCE_DIR}/internal
-# )
-
+target_include_directories(flora_nav-dr
+    PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/internal
+)
 
 # -- Flora Nav-OF (Optical Flow)
 # add_library(flora_nav-of

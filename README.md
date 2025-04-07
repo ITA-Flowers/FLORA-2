@@ -34,6 +34,7 @@ The project primarily uses the [**AirSim**](https://github.com/microsoft/AirSim)
 
 ``` text
 .
+├ cmake/           # CMake dependencies
 ├ data/            # Test data
 ├ docs/            # Documentation
 ├ src/             # Source code (C++ with CMake)
@@ -54,6 +55,95 @@ The project primarily uses the [**AirSim**](https://github.com/microsoft/AirSim)
 |**Python**| 3.12|
 
 Additional dependencies will be listed in `CMakeLists.txt`
+
+## Building
+
+### Prerequisite
+
+1. Make sure all dependencies are installed
+
+2. Clone the repository
+
+``` bash
+git clone https://github.com/ITA-Flowers/FLORA-2.git
+cd FLORA-2
+```
+
+### Basic Build
+
+``` bash
+# Create build directory
+mkdir build && cd build
+
+# Configure
+cmake ..
+
+# Build
+cmake --build . -j$(nproc)  # On Linux/macOS
+# or
+cmake --build . -j%NUMBER_OF_PROCESSORS%  # On Windows
+```
+
+### Build Options
+
+The following CMake options are available:
+
+- `BUILD_TESTS=ON/OFF` - Build unit and integration tests (default: ON)
+
+- `USE_EIGEN=ON/OFF` - Fetch Eigen3 library if needed (default: ON)
+
+- `ENABLE_WARNINGS=ON/OFF` - Enable all warning (default: ON)
+
+Example:
+
+``` bash
+cmake -DBUILD_TESTS=ON -DUSE_EIGEN=OFF ..
+```
+
+### Resetting the Build Configuration
+
+If you need to completely reset your build configuration (e.g., after changing compilers or major dependencies):
+
+``` bash
+# From the build directory, remove all generated files
+rm -rf *  # On Linux/macOS
+# or
+del /s /q *  # On Windows, or simply delete the folder contents
+
+# Reconfigure from scratch
+cmake ..
+```
+
+Alternatively, you can create a fresh build directory:
+
+``` bash
+# From the project root
+rm -rf build  # On Linux/macOS (or delete it manually on Windows)
+mkdir build && cd build
+cmake ..
+```
+
+For a "clean build" without resetting the configuration:
+
+``` bash
+# From the build directory
+cmake --build . --target clean
+# Then rebuild
+cmake --build .
+```
+
+### Build Configurations
+
+``` bash
+# Debug build
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+# Release build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+
+# Build with specific compiler
+cmake -DCMAKE_CXX_COMPILER=g++-10 ..
+```
 
 ## Developer Workflow
 

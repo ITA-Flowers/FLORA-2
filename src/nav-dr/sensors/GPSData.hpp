@@ -3,6 +3,10 @@
 
 #include "core/Vector3D.hpp"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 /**
  * @brief Class for storing and managing GPS data
  * 

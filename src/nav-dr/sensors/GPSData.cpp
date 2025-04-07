@@ -2,9 +2,6 @@
 #include "GPSData.hpp"
 #include <cmath>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 // Earth radius in meters
 const double EARTH_RADIUS = 6371000.0;

@@ -4,7 +4,7 @@ This directory contains utility scripts and tools for the UAV Optical Flow Navig
 
 ## Directory Structure
 
-> To do ...
+- [`/airsim`](airsim/) - AirSim drone flight scenarios
 
 ## Setup
 

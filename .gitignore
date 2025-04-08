@@ -5,6 +5,11 @@
 build/
 build-*/
 
+# Python
+.venv/
+venv/
+__pycache__/
+
 # Prerequisites
 *.d
 

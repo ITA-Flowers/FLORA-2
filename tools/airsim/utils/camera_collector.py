@@ -12,7 +12,7 @@ import csv
 import argparse
 import numpy as np
 import airsim
-import cv2
+import cv2 # type: ignore
 import math
 from datetime import datetime
 

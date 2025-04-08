@@ -49,7 +49,7 @@ The project primarily uses the [**AirSim**](https://github.com/microsoft/AirSim)
 |*[AirSim](https://github.com/microsoft/AirSim)* with **Unreal Engine**|4.27|
 |**C++ compiler**|17|
 |**CMake**| 3.12+|
-|**OpenCV**| 4.5+|
+|**OpenCV**| 4.9.0|
 |**Eigen**| 3.3+|
 |**Boost**| 1.65+|
 |**Python**| 3.9|

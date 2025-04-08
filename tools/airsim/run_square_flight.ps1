@@ -1,11 +1,11 @@
 # PowerShell script to run a square flight mission in AirSim with data collection
 
 # Set the output directory
-$TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$OUTPUT_DIR = "..\..\data\simulation\square-flight_$TimeStamp"
-$SQUARE_SIZE = 30  # meters
-$ALTITUDE = 40     # meters
-$SPEED = 15         # m/s
+$TimeStamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+$OUTPUT_DIR = "..\..\data\airsim\square-flight_$TimeStamp"
+$SQUARE_SIZE = 80  # meters
+$ALTITUDE = 100     # meters
+$SPEED = 10         # m/s
 
 # Print start message
 Write-Host "===================================================================" -ForegroundColor Cyan
@@ -38,7 +38,7 @@ if (-not (Test-Path $OUTPUT_DIR)) {
 # Run the square flight script
 Write-Host "Starting square flight..." -ForegroundColor Yellow
 try {
-    python square_flight.py `
+    python ./scenarios/square_flight.py `
         --output $OUTPUT_DIR `
         --size $SQUARE_SIZE `
         --altitude $ALTITUDE `

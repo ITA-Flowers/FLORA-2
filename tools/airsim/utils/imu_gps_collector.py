@@ -33,7 +33,8 @@ class IMUGPSCollector:
         # Connect to AirSim
         self.client = airsim.MultirotorClient()
         self.client.confirmConnection()
-        
+        print(f"[Collector][IMU/GPS] Connected to AirSim! Client Ver:{self.client.getClientVersion()} (Min Req: {self.client.getMinRequiredClientVersion()}), Server Ver:{self.client.getServerVersion()} (Min Req: {self.client.getMinRequiredServerVersion()})")
+
         # Create output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
         
@@ -60,9 +61,8 @@ class IMUGPSCollector:
     
     def start_collection(self):
         """Start collecting data from IMU and GPS."""
-        print(f"Starting data collection at {self.frequency} Hz...")
-        print(f"Data will be saved to {self.imu_gps_file}")
-        
+        print(f"[Collector][IMU/GPS] Starting data collection at {self.frequency} Hz...")
+
         self.start_time = time.time()
         next_sample_time = self.start_time
         
@@ -72,7 +72,7 @@ class IMUGPSCollector:
                 
                 # Check if we've reached the duration limit
                 if self.duration and (current_time - self.start_time) >= self.duration:
-                    print(f"Reached duration limit of {self.duration} seconds")
+                    print(f"[Collector][IMU/GPS] Reached duration limit of {self.duration} seconds")
                     break
                 
                 # Wait until next sample time
@@ -103,19 +103,19 @@ class IMUGPSCollector:
                 self.samples_collected += 1
                 if self.samples_collected % self.frequency == 0:
                     elapsed = current_time - self.start_time
-                    print(f"Collected {self.samples_collected} samples ({elapsed:.2f} seconds)")
+                    print(f"[Collector][IMU/GPS] Collected {self.samples_collected} samples ({elapsed:.2f} seconds)")
                 
                 # Schedule next sample
                 next_sample_time += self.interval
                 
         except KeyboardInterrupt:
-            print("\nData collection interrupted by user")
+            print("\n[Collector][IMU/GPS] Data collection interrupted by user")
         finally:
             elapsed_time = time.time() - self.start_time
             self.csv_file.close()
-            print(f"Data collection finished. Collected {self.samples_collected} samples over {elapsed_time:.2f} seconds")
-            print(f"Average sampling rate: {self.samples_collected / elapsed_time:.2f} Hz")
-            print(f"Data saved to {self.imu_gps_file}")
+            print(f"[Collector][IMU/GPS] Data collection finished. Collected {self.samples_collected} samples over {elapsed_time:.2f} seconds")
+            print(f"[Collector][IMU/GPS] Average sampling rate: {self.samples_collected / elapsed_time:.2f} Hz")
+            print(f"[Collector][IMU/GPS] Data saved to {self.imu_gps_file}")
     
     def simulate_gps_outage(self, duration=5.0):
         """
@@ -124,7 +124,7 @@ class IMUGPSCollector:
         Args:
             duration (float): Duration of the outage in seconds
         """
-        print(f"Simulating GPS outage for {duration} seconds...")
+        print(f"[Collector][IMU/GPS] * Simulating GPS outage for {duration} seconds...")
         
         outage_end_time = time.time() + duration
         while time.time() < outage_end_time:
@@ -150,7 +150,7 @@ class IMUGPSCollector:
             self.samples_collected += 1
             time.sleep(self.interval)
         
-        print("GPS outage simulation finished")
+        print("[Collector][IMU/GPS] GPS outage simulation finished")
 
 
 def main():

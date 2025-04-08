@@ -48,7 +48,7 @@ class VideoAssembler:
             for row in reader:
                 metadata.append(row)
         
-        print(f"Loaded metadata for {len(metadata)} frames")
+        print(f"[VIDEO_ASSEMBLER] Loaded metadata for {len(metadata)} frames")
         return metadata
     
     def _load_sensor_data(self):
@@ -59,7 +59,7 @@ class VideoAssembler:
             for row in reader:
                 sensor_data.append(row)
         
-        print(f"Loaded sensor data with {len(sensor_data)} entries")
+        print(f"[VIDEO_ASSEMBLER] Loaded sensor data with {len(sensor_data)} entries")
         return sensor_data
     
     def _find_nearest_sensor_data(self, timestamp):
@@ -142,18 +142,18 @@ class VideoAssembler:
     def assemble_video(self):
         """Assemble the video from collected frames."""
         if not self.metadata:
-            print("No metadata found. Cannot assemble video.")
+            print("[VIDEO_ASSEMBLER] [Error]: No metadata found. Cannot assemble video.")
             return False
         
         # Get first image to determine dimensions
         first_frame_path = os.path.join(self.images_dir, self.metadata[0]['image_filename'])
         if not os.path.exists(first_frame_path):
-            print(f"Error: First frame not found at {first_frame_path}")
+            print(f"[VIDEO_ASSEMBLER] [Error]: First frame not found at {first_frame_path}")
             return False
         
         first_frame = cv2.imread(first_frame_path)
         if first_frame is None:
-            print(f"Error: Could not read first frame at {first_frame_path}")
+            print(f"[VIDEO_ASSEMBLER] [Error]: Could not read first frame at {first_frame_path}")
             return False
         
         height, width, _ = first_frame.shape
@@ -162,21 +162,22 @@ class VideoAssembler:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Use 'avc1' for h264 codec if available
         video_writer = cv2.VideoWriter(self.output_file, fourcc, self.fps, (width, height))
         
-        print(f"Creating video: {self.output_file}")
-        print(f"Resolution: {width}x{height}, FPS: {self.fps}")
+        # print(f"[VIDEO_ASSEMBLER] Creating video: {self.output_file}")
+        print(f"[VIDEO_ASSEMBLER] Creating video...")
+        print(f"[VIDEO_ASSEMBLER] Resolution: {width}x{height}, FPS: {self.fps}")
         
-        for entry in tqdm(self.metadata, desc="Assembling video"):
+        for entry in tqdm(self.metadata, desc="[VIDEO_ASSEMBLER] Assembling video"):
             # Get the frame path
             frame_path = os.path.join(self.images_dir, entry['image_filename'])
             
             if not os.path.exists(frame_path):
-                print(f"Warning: Frame not found: {frame_path}")
+                print(f"[VIDEO_ASSEMBLER] [Warning]: Frame not found: {frame_path}")
                 continue
             
             # Read the frame
             frame = cv2.imread(frame_path)
             if frame is None:
-                print(f"Warning: Could not read frame: {frame_path}")
+                print(f"[VIDEO_ASSEMBLER] [Warning]: Could not read frame: {frame_path}")
                 continue
             
             # Find corresponding sensor data for overlay
@@ -199,7 +200,7 @@ class VideoAssembler:
         
         # Release resources
         video_writer.release()
-        print(f"Video assembled successfully: {self.output_file}")
+        print(f"[VIDEO_ASSEMBLER] Video assembled successfully.")
         
         return True
     
@@ -211,14 +212,14 @@ class VideoAssembler:
         a single CSV file with all data aligned by timestamp.
         """
         if not self.metadata or not self.sensor_data:
-            print("Both metadata and sensor data are required for synchronization.")
+            print("[VIDEO_ASSEMBLER] Both metadata and sensor data are required for synchronization.")
             return False
         
         if output_csv is None:
             base_name = os.path.splitext(self.output_file)[0]
             output_csv = f"{base_name}_synchronized.csv"
         
-        print(f"Creating synchronized dataset: {output_csv}")
+        print(f"[VIDEO_ASSEMBLER] Creating synchronized dataset: {output_csv}")
         
         # Collect headers from both datasets
         meta_headers = list(self.metadata[0].keys())
@@ -234,7 +235,7 @@ class VideoAssembler:
             writer = csv.DictWriter(f, fieldnames=combined_headers)
             writer.writeheader()
             
-            for entry in tqdm(self.metadata, desc="Synchronizing data"):
+            for entry in tqdm(self.metadata, desc="[VIDEO_ASSEMBLER] Synchronizing data"):
                 # Find nearest sensor data
                 sensor_entry = self._find_nearest_sensor_data(entry['timestamp'])
                 
@@ -247,7 +248,7 @@ class VideoAssembler:
                 # Write to CSV
                 writer.writerow(combined_entry)
         
-        print(f"Synchronized dataset created: {output_csv}")
+        print(f"[VIDEO_ASSEMBLER] Synchronized dataset created.")
         return True
 
 

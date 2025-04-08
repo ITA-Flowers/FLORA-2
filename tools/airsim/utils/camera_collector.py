@@ -43,7 +43,7 @@ class CameraCollector:
         # Connect to AirSim
         self.client = airsim.MultirotorClient()
         self.client.confirmConnection()
-        print(f"Connected to AirSim! Client Ver:{self.client.getClientVersion()} (Min Req: {self.client.getMinRequiredClientVersion()}), Server Ver:{self.client.getServerVersion()} (Min Req: {self.client.getMinRequiredServerVersion()})")
+        print(f"[Collector][CAM/REC] Connected to AirSim! Client Ver:{self.client.getClientVersion()} (Min Req: {self.client.getMinRequiredClientVersion()}), Server Ver:{self.client.getServerVersion()} (Min Req: {self.client.getMinRequiredServerVersion()})")
         
         # Try to set camera parameters (if available)
         self.configure_camera()
@@ -86,22 +86,22 @@ class CameraCollector:
                 airsim.to_quaternion(math.radians(-90), 0, 0)  # obrót (pitch = -90 stopni)
             )
             
-            print("Setting camera pose to look downward (pitch = -90°)")
+            print("[Collector][CAM/REC] Setting camera pose to look downward (pitch = -90°)")
             self.client.simSetCameraPose(self.camera_name, camera_pose)
             
             # Try to set camera FOV if method is available
             if hasattr(self.client, "simSetCameraFov"):
                 self.client.simSetCameraFov(self.camera_name, self.fov)
-                print(f"Set camera FOV to {self.fov} degrees")
+                print(f"[Collector][CAM/REC] Set camera FOV to {self.fov} degrees")
             else:
-                print("Method simSetCameraFov not available. Camera FOV settings should be configured in AirSim settings.json")
+                print("[Collector][CAM/REC] Method simSetCameraFov not available. Camera FOV settings should be configured in AirSim settings.json")
             
             # Note: Camera resolution is set in AirSim settings.json
-            print(f"Camera resolution should be configured in settings.json (requested: {self.width}x{self.height})")
+            print(f"[Collector][CAM/REC] Camera resolution should be configured in settings.json (requested: {self.width}x{self.height})")
             
         except Exception as e:
-            print(f"Warning: Could not configure camera: {e}")
-            print("Continuing with default camera settings")
+            print(f"[Collector][CAM/REC] [Warning]: Could not configure camera: {e}")
+            print("[Collector][CAM/REC] Continuing with default camera settings")
         
     def save_camera_parameters(self):
         """Save camera intrinsic parameters to a file."""
@@ -139,13 +139,13 @@ class CameraCollector:
         with open(self.camera_params_file, 'w') as f:
             json.dump(camera_params, f, indent=4)
         
-        print(f"Camera parameters saved to {self.camera_params_file}")
+        print(f"[Collector][CAM/REC] Camera parameters saved to {self.camera_params_file}")
         
     def start_collection(self):
         """Start collecting images from the camera."""
-        print(f"Starting camera collection at {self.fps} FPS...")
-        print(f"Images will be saved to {self.images_dir}")
-        print(f"Camera parameters: {self.width}x{self.height}, FOV: {self.fov}°")
+        print(f"[Collector][CAM/REC] Starting camera collection at {self.fps} FPS...")
+        print(f"[Collector][CAM/REC] Images will be saved to {self.images_dir}")
+        print(f"[Collector][CAM/REC] Camera parameters: {self.width}x{self.height}, FOV: {self.fov}°")
         
         self.start_time = time.time()
         next_frame_time = self.start_time
@@ -156,14 +156,14 @@ class CameraCollector:
         ])
         
         if first_response:
-            print(f"First image received: {len(first_response[0].image_data_uint8)} bytes")
-            print(f"Image dimensions: {first_response[0].width}x{first_response[0].height}")
+            print(f"[Collector][CAM/REC] First image received: {len(first_response[0].image_data_uint8)} bytes")
+            print(f"[Collector][CAM/REC] Image dimensions: {first_response[0].width}x{first_response[0].height}")
             
             # Update dimensions if they differ from requested
             if first_response[0].width != self.width or first_response[0].height != self.height:
-                print(f"WARNING: Actual image dimensions ({first_response[0].width}x{first_response[0].height}) " + 
+                print(f"[Collector][CAM/REC] [WARNING]: Actual image dimensions ({first_response[0].width}x{first_response[0].height}) " + 
                       f"differ from requested ({self.width}x{self.height})")
-                print("Using actual dimensions for processing")
+                print("[Collector][CAM/REC] Using actual dimensions for processing")
                 self.width = first_response[0].width
                 self.height = first_response[0].height
         
@@ -173,16 +173,13 @@ class CameraCollector:
                 
                 # Check if we've reached the duration limit
                 if self.duration and (current_time - self.start_time) >= self.duration:
-                    print(f"Reached duration limit of {self.duration} seconds")
+                    print(f"[Collector][CAM/REC] Reached duration limit of {self.duration} seconds")
                     break
                 
                 # Wait until next frame time
                 if current_time < next_frame_time:
-                    time.sleep(0.001)  # Small sleep to avoid CPU spinning
+                    time.sleep(0.00025)
                     continue
-                
-                # Aktualizuj pozycję kamery, aby symulować gimbala
-                self.update_camera_gimbal()
                 
                 # Get camera image
                 responses = self.client.simGetImages([
@@ -221,10 +218,10 @@ class CameraCollector:
                         
                         self.frame_count += 1
                         if self.frame_count % self.fps == 0:
-                            print(f"Captured {self.frame_count} frames ({elapsed:.2f} seconds)")
+                            print(f"[Collector][CAM/REC] Captured {self.frame_count} frames ({elapsed:.2f} seconds)")
                     
                     except Exception as e:
-                        print(f"Error processing image: {e}")
+                        print(f"[Collector][CAM/REC] Error processing image: {e}")
                         import traceback
                         traceback.print_exc()
                 
@@ -232,47 +229,14 @@ class CameraCollector:
                 next_frame_time += self.interval
                 
         except KeyboardInterrupt:
-            print("\nImage collection interrupted by user")
+            print("\n[Collector][CAM/REC] Image collection interrupted by user")
         finally:
             elapsed_time = time.time() - self.start_time
             self.csv_file.close()
-            print(f"Image collection finished. Captured {self.frame_count} frames over {elapsed_time:.2f} seconds")
-            print(f"Average frame rate: {self.frame_count / elapsed_time:.2f} FPS")
-            print(f"Metadata saved to {self.metadata_file}")
+            print(f"[Collector][CAM/REC] Image collection finished. Captured {self.frame_count} frames over {elapsed_time:.2f} seconds")
+            print(f"[Collector][CAM/REC] Average frame rate: {self.frame_count / elapsed_time:.2f} FPS")
+            print(f"[Collector][CAM/REC] Metadata saved to {self.metadata_file}")
             
-    def update_camera_gimbal(self):
-        """Aktualizuj pozycję kamery, aby zawsze była skierowana prostopadle do podłoża."""
-        try:
-            # Pobierz aktualną orientację drona
-            drone_state = self.client.getMultirotorState()
-            drone_orientation = drone_state.kinematics_estimated.orientation
-            
-            # Konwersja kwaterniona drona na kąty Eulera
-            drone_orientation_euler = airsim.to_eularian_angles(drone_orientation)
-            pitch = drone_orientation_euler[0]
-            roll = drone_orientation_euler[1]
-            yaw = drone_orientation_euler[2]
-            
-            # Kąt dla kamery jest odwrotnością kąta drona - aby kompensować jego ruch
-            # Dla pitch, dodajemy -π/2 (-90°), aby kamera była skierowana w dół
-            camera_pitch = -math.pi/2  # Kompensacja pitch + 90° w dół
-            camera_roll = 0               # Przeciwny roll
-            camera_yaw = 0                  # Zachowanie tego samego yaw
-            
-            # Konwersja na kwaternion
-            camera_orientation = airsim.to_quaternion(camera_pitch, camera_roll, camera_yaw)
-            
-            # Ustaw pozę kamery
-            camera_pose = airsim.Pose(airsim.Vector3r(0, 0, 0), camera_orientation)
-            self.client.simSetCameraPose(self.camera_name, camera_pose)
-            
-            # Debugowanie - wyświetl co 5 klatek
-            if self.frame_count % 5 == 0:
-                print(f"Drone orientation: pitch={math.degrees(pitch):.1f}°, roll={math.degrees(roll):.1f}°, yaw={math.degrees(yaw):.1f}°")
-                print(f"Camera orientation: pitch={math.degrees(camera_pitch):.1f}°, roll={math.degrees(camera_roll):.1f}°, yaw={math.degrees(camera_yaw):.1f}°")
-            
-        except Exception as e:
-            print(f"Warning: Could not update camera gimbal: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description='Collect camera images from AirSim')

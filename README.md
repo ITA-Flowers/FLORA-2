@@ -52,7 +52,7 @@ The project primarily uses the [**AirSim**](https://github.com/microsoft/AirSim)
 |**OpenCV**| 4.5+|
 |**Eigen**| 3.3+|
 |**Boost**| 1.65+|
-|**Python**| 3.12|
+|**Python**| 3.9|
 
 Additional dependencies will be listed in `CMakeLists.txt`
 

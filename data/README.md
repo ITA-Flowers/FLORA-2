@@ -31,13 +31,7 @@ This directory contains test data used for development, testing, and validation 
     - `/calibration` - Sensor calibration data
 
 
-- `/simulation` - AirSim simulation data
-
-    - `/environments` - Configuration files for different simulation environments
-    
-    - `/scenarios` - Predefined flight scenarios for testing
-    
-    - `/settings` - AirSim settings files
+- `/airsim` - AirSim simulation data
 
 ## Adding New Data
 
@@ -79,7 +73,7 @@ Due to the potentially large size of video files, this repository does not direc
 
 **GPS logs**: **CSV** with columns for `timestamp`, `latitude`, `longitude`, `altitude`, `accuracy`
 
-**Video**: **MP4** or **AVI** format, preferably with **constant frame rate**
+**Video**: **MP4** or **AVI** format, preferably with **constant frame rate** (30 FPS)
 
 ## Data Privacy
 

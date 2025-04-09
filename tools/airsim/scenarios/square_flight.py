@@ -88,7 +88,7 @@ class SquareFlightController:
         # Rotate 90 degrees around x-axis to point downward
         camera_pose = airsim.Pose(
             airsim.Vector3r(0, 0, 0),  # No position offset
-            airsim.to_quaternion(math.pi/2, 0, 0)  # 90 degrees around x-axis
+            airsim.to_quaternion(-math.pi/2, 0, 0)  # 90 degrees around x-axis
         )
         
         # Set the camera pose
@@ -146,7 +146,7 @@ class SquareFlightController:
             python_exe, imu_gps_script,
             "--output", output_dir,
             "--frequency", "100",
-            "--duration", str(duration + 30)  # Add buffer time
+            "--duration", str(duration + 60)  # Add buffer time
         ]
         
         print(f" * Starting IMU/GPS collector...")
@@ -158,10 +158,11 @@ class SquareFlightController:
             python_exe, camera_script,
             "--output", output_dir,
             "--fps", "30",
-            "--width", "1280",
-            "--height", "720",
+            "--width", "320",
+            "--height", "240",
             "--fov", "90",
-            "--duration", str(duration + 30)  # Add buffer time
+            "--metadata-interval", "10",
+            "--duration", str(duration + 60)  # Add buffer time
         ]
         
         print(f" * Starting camera collector...")
@@ -285,8 +286,8 @@ class SquareFlightController:
             # Stop data collection
             self.stop_data_collection()
             
-            # Create video from collected images
-            self.assemble_video(output_dir)
+            # # Create video from collected images
+            # self.assemble_video(output_dir)
     
     def assemble_video(self, output_dir):
         """

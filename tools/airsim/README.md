@@ -2,6 +2,12 @@
 
 This directory contains Python scripts for running and collecting data from flight simulations in AirSim. These tools help automate test flights, gather sensor data, and evaluate navigation algorithms in a controlled virtual environment.
 
+## Directory Structure
+
+- `/settings` - AirSim settings for specific scenarios
+
+- `/utils` - Auxillary Python classes like data collectors or video assembling scripts
+
 ## Prerequisites
 
 - **AirSim** (with Unreal Engine **4.27**)
@@ -35,6 +41,8 @@ Blocks.exe -windowed -ResX=1024 -ResY=768
 
 2. Run script
 
-``` bash
-python scenario_1.py
+Example:
+
+``` powershell
+./run_square_flight.ps1
 ```

@@ -3,11 +3,11 @@ param (
 )
 
 $TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$OUTPUT_DIR = "..\..\data\simulation\$Mode-flight_$TimeStamp"
+$OUTPUT_DIR = "..\..\..\data\simulation\$Mode-flight_$TimeStamp"
 $FLIGHT_SCRIPT = "..\flight_controller.py"
-$SIZE = 30
+$SIZE = 50
 $ALTITUDE = 40
-$SPEED = 15
+$SPEED = 10
 
 function Write-Cyan { param($msg) Write-Host $msg -ForegroundColor Cyan }
 function Write-Yellow { param($msg) Write-Host $msg -ForegroundColor Yellow }

@@ -13,13 +13,13 @@ import argparse
 import subprocess
 import airsim
 
-
 class FlightController:
-    def __init__(self, mode, size=50, altitude=20, speed=5):
+    def __init__(self, mode, size=50, altitude=20, speed=5, mute_collectors=False):
         self.mode = mode
         self.size = size
         self.altitude = altitude
         self.speed = speed
+        self.mute_collectors = mute_collectors
         self.client = None
         self.data_processes = []
 
@@ -34,14 +34,10 @@ class FlightController:
         if not vehicles:
             raise RuntimeError("No vehicles found in AirSim")
 
-        self.client.enableApiControl(True)
-        self.client.armDisarm(True)
-
-        self.configure_camera()
         print("Connection established.")
 
     def configure_camera(self):
-        pose = airsim.Pose(airsim.Vector3r(0, 0, 0), airsim.to_quaternion(math.pi/2, 0, 0))
+        pose = airsim.Pose(airsim.Vector3r(0, 0, 0), airsim.to_quaternion(-math.pi/2, 0, 0))
         self.client.simSetCameraPose("0", pose)
         print("Camera set to downward orientation.")
 
@@ -78,52 +74,52 @@ class FlightController:
         print("Data collection stopped.")
 
     def take_off(self):
-        print(f"Taking off to {self.altitude}m...")
+        print(f"   - Taking off to {self.altitude}m...")
         self.client.takeoffAsync().join()
         self.client.moveToZAsync(-self.altitude, self.speed).join()
         time.sleep(5)
 
     def land(self):
-        print("Landing...")
+        print("   - Starting landing procedure...")
+        
+        current_pos = self.client.getMultirotorState().kinematics_estimated.position
+        
+        print("   - Descending to 2m altitude...")
+        self.client.moveToPositionAsync(
+            current_pos.x_val, 
+            current_pos.y_val, 
+            -2.0,
+            self.speed
+        ).join()
+        
+        height = -self.client.getMultirotorState().kinematics_estimated.position.z_val
+        print(f"   - Reached altitude of {height:.1f}m")
+        
+        print("   - Executing final landing...")
         self.client.landAsync().join()
+        
+        landed_state = self.client.getMultirotorState().landed_state
+        print(f"   - Landing completed, state: {landed_state}")
+        
+        print("   - Disarming drone...")
         self.client.armDisarm(False)
         self.client.enableApiControl(False)
-
-    def assemble_video(self, output_dir, name):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        utils_dir = os.path.join(current_dir, "utils")
-        venv_dir = os.path.join(current_dir, ".venv")
-        python_exe = sys.executable
-        if os.name == 'nt':
-            alt_python = os.path.join(venv_dir, "Scripts", "python.exe")
-        else:
-            alt_python = os.path.join(venv_dir, "bin", "python")
-        if os.path.exists(alt_python):
-            python_exe = alt_python
-
-        metadata = next(iter(os.listdir(output_dir)), None)
-        if metadata is None:
-            print("No metadata found.")
-            return
-
-        script = os.path.join(utils_dir, "video_assembler.py")
-        video_output = os.path.join(output_dir, f"{name}_flight.mp4")
-        cmd = [
-            python_exe, script,
-            "--images", os.path.join(output_dir, "images"),
-            "--metadata", os.path.join(output_dir, metadata),
-            "--output", video_output,
-            "--fps", "30"
-        ]
-        print(f"Running video assembler...")
-        subprocess.run(cmd)
+        print("   - Landing procedure completed")
 
     def fly_straight(self):
         state = self.client.getMultirotorState().kinematics_estimated.position
         target = airsim.Vector3r(state.x_val + self.size, state.y_val, -self.altitude)
+        
+        print(f"   - Flying straight to {target}...")
         self.client.moveToPositionAsync(target.x_val, target.y_val, target.z_val, self.speed).join()
+        
+        print("   - Hovering...")
         time.sleep(3)
+        
+        print(f"   - Flying straight to {state}...")
         self.client.moveToPositionAsync(state.x_val, state.y_val, -self.altitude, self.speed).join()
+        
+        print("   - Hovering...")
         time.sleep(3)
 
     def fly_square(self):
@@ -154,6 +150,15 @@ class FlightController:
         duration = (4 * self.size / self.speed) + 30
         self.client.reset()
         time.sleep(2)
+        
+        print("   - Arming...")
+        self.client.enableApiControl(True)
+        self.client.armDisarm(True)
+        time.sleep(2)
+        print("   - Armed.")
+        
+        self.configure_camera()
+        
         self.start_data_collection(output_dir, duration)
         time.sleep(3)
         self.take_off()
@@ -164,11 +169,12 @@ class FlightController:
             self.fly_straight()
         elif self.mode == "circle":
             self.fly_circle()
+        else:
+            raise ValueError(f"Unknown flight mode: {self.mode}")
 
         self.land()
         time.sleep(5)
         self.stop_data_collection()
-        self.assemble_video(output_dir, self.mode)
 
 
 def signal_handler(sig, frame):

@@ -1,12 +1,12 @@
 include(FetchContent)
 
 function(fetch_dependencies)
-    # Eigen package
-
+    # =======================
+    # Eigen3
+    # =======================
     if(USE_EIGEN3)
         message(STATUS "Fetching Eigen3...")
 
-        # First, check if there is a local installation
         if(EXISTS "${PROJECT_SOURCE_DIR}/include/external/eigen/Eigen/Core")
             message(STATUS "Using local Eigen installation")
             add_library(Eigen3::Eigen INTERFACE IMPORTED)
@@ -14,7 +14,6 @@ function(fetch_dependencies)
                 INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/include/external/eigen"
             )
         else()
-            # If not, download it
             find_package(Eigen3 3.3 QUIET)
             if(NOT Eigen3_FOUND)
                 message(STATUS "Eigen not found. Downloading...")
@@ -37,7 +36,9 @@ function(fetch_dependencies)
         message(STATUS "Eigen3 library is disabled")
     endif()
 
-    # GoogleTest package
+    # =======================
+    # GoogleTest
+    # =======================
     if(BUILD_TESTS)
         message(STATUS "Fetching GoogleTest...")
 
@@ -49,11 +50,42 @@ function(fetch_dependencies)
                 GIT_REPOSITORY https://github.com/google/googletest.git
                 GIT_TAG release-1.12.1
             )
-            # Disable installation of GoogleTest
             set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
             set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
             set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
             FetchContent_MakeAvailable(googletest)
         endif()
     endif()
+
+    # =======================
+    # OpenCV
+    # =======================
+    if(USE_OPENCV)
+        message(STATUS "Fetching OpenCV...")
+
+        find_package(OpenCV QUIET)
+
+        if(NOT OpenCV_FOUND)
+            message(STATUS "OpenCV not found. Downloading...")
+
+            FetchContent_Declare(
+                opencv
+                GIT_REPOSITORY https://github.com/opencv/opencv.git
+                GIT_TAG 4.9.0
+            )
+
+            # Minimalny zestaw komponentów OpenCV do budowy
+            set(BUILD_LIST "core,imgproc,highgui,video,videoio" CACHE STRING "" FORCE)
+            set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+            set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+            set(BUILD_PERF_TESTS OFF CACHE BOOL "" FORCE)
+            set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+            set(BUILD_opencv_python_bindings_generator OFF CACHE BOOL "" FORCE)
+
+            FetchContent_MakeAvailable(opencv)
+        endif()
+    else()
+        message(STATUS "OpenCV is disabled")
+    endif()
+
 endfunction()

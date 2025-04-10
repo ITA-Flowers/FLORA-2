@@ -8,7 +8,7 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS} src)
 
 add_executable(realtime_optical_flow
-    src/main.cpp
+    src/main-of.cpp
     src/optical_flow_realtime.cpp
     src/horn_schunck.cpp
     src/kalman_filter.cpp

@@ -13,20 +13,21 @@ void hornSchunck(const cv::Mat& prev, const cv::Mat& curr, cv::Mat& u, cv::Mat& 
     u = cv::Mat::zeros(I1.size(), CV_32F);
     v = cv::Mat::zeros(I1.size(), CV_32F);
 
-    cv::Mat uAvg, vAvg, kernel = (cv::Mat_<float>(3,3) <<
+    cv::Mat kernel = (cv::Mat_<float>(3,3) <<
         1/12.0, 1/6.0, 1/12.0,
-        1/6.0,  0,    1/6.0,
+        1/6.0,  0,     1/6.0,
         1/12.0, 1/6.0, 1/12.0
     );
 
     for (int i = 0; i < iterations; ++i) {
+        cv::Mat uAvg, vAvg;
         cv::filter2D(u, uAvg, -1, kernel);
         cv::filter2D(v, vAvg, -1, kernel);
 
-        cv::Mat numerator = Ix.mul(uAvg) + Iy.mul(vAvg) + It;
-        cv::Mat denominator = alpha * alpha + Ix.mul(Ix) + Iy.mul(Iy);
+        cv::Mat num = Ix.mul(uAvg) + Iy.mul(vAvg) + It;
+        cv::Mat denom = alpha * alpha + Ix.mul(Ix) + Iy.mul(Iy);
 
-        u = uAvg - Ix.mul(numerator) / denominator;
-        v = vAvg - Iy.mul(numerator) / denominator;
+        u = uAvg - Ix.mul(num) / denom;
+        v = vAvg - Iy.mul(num) / denom;
     }
 }

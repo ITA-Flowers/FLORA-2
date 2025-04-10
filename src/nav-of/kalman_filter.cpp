@@ -1,7 +1,7 @@
 #include "kalman_filter.hpp"
 
 Kalman1D::Kalman1D(float processNoise, float measurementNoise, float estimateError, float initialValue)
-    : q(processNoise), r(measurementNoise), p(estimateError), x(initialValue), k(0) {}
+    : q(processNoise), r(measurementNoise), p(estimateError), x(initialValue), k(0.0f) {}
 
 float Kalman1D::update(float measurement) {
     p += q;

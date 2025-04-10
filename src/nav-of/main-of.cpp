@@ -10,7 +10,7 @@ int main() {
         1080     // Image height (pixels)
     );
 
-    cv::VideoCapture cap("data/Mar-9th-08-31AM-video-processed.mp4");
+    cv::VideoCapture cap("C:/Projekty/FLORA-2/data/Mar-9th-08-31AM-video-processed.mp4");
     if (!cap.isOpened()) {
         std::cerr << "Failed to open video source." << std::endl;
         return 1;

@@ -1,3 +1,4 @@
+#pragma message("✅ horn_schunck.hpp INCLUDED!")
 #pragma once
 #include <opencv2/opencv.hpp>
 

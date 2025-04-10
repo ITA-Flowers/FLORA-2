@@ -1,9 +1,11 @@
 #include "horn_schunck.hpp"
+#include <opencv2/imgproc.hpp>
 
-void hornSchunck(const cv::Mat& prev, const cv::Mat& curr, cv::Mat& u, cv::Mat& v, float alpha, int iterations) {
-    cv::Mat I1, I2;
-    prev.convertTo(I1, CV_32F);
-    curr.convertTo(I2, CV_32F);
+void hornSchunck(const cv::Mat& prevGray, const cv::Mat& currGray,
+                 cv::Mat& u, cv::Mat& v, float alpha, int iterations) {
+    cv::Mat I1 = prevGray.clone(), I2 = currGray.clone();
+    I1.convertTo(I1, CV_32F);
+    I2.convertTo(I2, CV_32F);
 
     cv::Mat Ix, Iy, It;
     cv::Sobel(I1, Ix, CV_32F, 1, 0, 3);
@@ -13,13 +15,11 @@ void hornSchunck(const cv::Mat& prev, const cv::Mat& curr, cv::Mat& u, cv::Mat& 
     u = cv::Mat::zeros(I1.size(), CV_32F);
     v = cv::Mat::zeros(I1.size(), CV_32F);
 
-    cv::Mat kernel = (cv::Mat_<float>(3,3) <<
-        1/12.0, 1/6.0, 1/12.0,
-        1/6.0,  0,     1/6.0,
-        1/12.0, 1/6.0, 1/12.0
-    );
+    cv::Mat kernel = (cv::Mat_<float>(3,3) << 1/12.0f, 1/6.0f, 1/12.0f,
+                                              1/6.0f,  0.0f, 1/6.0f,
+                                              1/12.0f, 1/6.0f, 1/12.0f);
 
-    for (int i = 0; i < iterations; ++i) {
+    for (int iter = 0; iter < iterations; ++iter) {
         cv::Mat uAvg, vAvg;
         cv::filter2D(u, uAvg, -1, kernel);
         cv::filter2D(v, vAvg, -1, kernel);

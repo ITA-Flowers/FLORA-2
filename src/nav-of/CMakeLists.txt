@@ -5,15 +5,18 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(OpenCV REQUIRED)
 
-# Zbieramy wszystkie .cpp z bieżącego katalogu
-file(GLOB SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/algo
+)
+
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/algo/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/app/*.cpp
+)
 
 add_executable(nav_of_main ${SOURCES})
-
-# ⬇️ USTAWIAMY include path NA PEWNO
-target_include_directories(nav_of_main PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}"
-    ${OpenCV_INCLUDE_DIRS}
-)
 
 target_link_libraries(nav_of_main ${OpenCV_LIBS})

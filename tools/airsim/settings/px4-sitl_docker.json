@@ -1,0 +1,56 @@
+{
+  "SettingsVersion": 1.2,
+  "SimMode": "Multirotor",
+  "ClockType": "SteppableClock",
+  "Vehicles": {
+          "PX4": {
+              "VehicleType": "PX4Multirotor",
+              "UseSerial": false,
+              "LockStep": true,
+              "UseTcp": true,
+              "TcpPort": 4560,
+              "ControlIp": "remote",
+              "ControlPortLocal": 14240,
+              "ControlPortRemote": 14280,
+              "LocalHostIp": "172.17.0.2",
+              "Sensors":{
+                  "Barometer":{
+                      "SensorType": 1,
+                      "Enabled": true,
+                      "PressureFactorSigma": 0.0001825
+                  }
+              },
+              "Parameters": {
+                  "NAV_RCL_ACT": 0,
+                  "NAV_DLL_ACT": 0,
+                  "COM_OBL_ACT": 1,
+                  "LPE_LAT": 52.267997,
+                  "LPE_LON": 20.916450
+              }
+          }
+      },
+      "CameraDefaults": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 320,
+              "Height": 240,
+              "FOV_Degrees": 90,
+              "AutoExposureSpeed": 100,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "Gimbal": {
+            "Stabilization": 0.8,
+            "Pitch": -90,
+            "Roll": 0,
+            "Yaw": 0
+          }
+      }
+}

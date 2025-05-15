@@ -3,7 +3,6 @@ project(nav_of)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Znajdź OpenCV z CUDA (zakładamy, że instalacja trafiła do /usr/local/lib/cmake/opencv4)
 set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
 
 find_package(OpenCV REQUIRED)

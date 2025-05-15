@@ -29,6 +29,21 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
+    std::ofstream outFile("speed_log.csv");
+    outFile << "frame_number,speed_mps\n";  
+
+    int frameCount = 0;
+    while (cap.read(frame)) {
+        processor.pushFrame(frame);
+        double speed = processor.getLastSpeed();
+
+        if (speed >= 0.0) {
+            std::cout << "Speed: " << speed << " m/s" << std::endl;
+            outFile << frameCount << "," << speed << "\n";
+        }
+        frameCount++;
+    }
+
     cv::Mat frame;
     while (cap.read(frame)) {
         double now = static_cast<double>(cv::getTickCount());
@@ -40,6 +55,6 @@ int main(int argc, char* argv[]) {
             std::cout << "Speed: " << v.x << " m/s" << std::endl;
         }
     }
-
+    outFile.close();
     return 0;
 }

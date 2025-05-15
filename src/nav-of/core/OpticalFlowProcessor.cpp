@@ -1,5 +1,6 @@
 #include "OpticalFlowProcessor.hpp"
 #include "../algo/horn_schunck.hpp"
+#include "../algo/farneback_gpu.hpp"
 #include "../algo/utils.hpp"
 #include <cmath>
 #include <opencv2/imgproc.hpp>
@@ -34,12 +35,7 @@ bool OpticalFlowProcessor::update(const cv::Mat& frame, double deltaTime, double
     float fovDeg = 2.0f * std::atan((imageHeight_ * 0.5f) / focalLengthMm_) * (180.0f / static_cast<float>(M_PI));
     float metricScale = calculateMetricScale(altitude, fovDeg, imageHeight_);
 
-    cv::Mat u, v;
-    hornSchunck(prevGray_, gray, u, v);
-
-    cv::Mat mag;
-    cv::magnitude(u, v, mag);
-    double avgMag = cv::mean(mag)[0];
+    float avgMag = computeFarnebackGpuMagnitude(prevGray_, gray);
 
     float rawSpeed = avgMag * metricScale * fps_;
     float filteredSpeed = kalman_.update(rawSpeed);

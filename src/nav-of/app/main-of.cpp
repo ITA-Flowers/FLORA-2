@@ -1,31 +1,45 @@
 #include "../core/OpticalFlowProcessor.hpp"
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <cstdlib>
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc < 7) {
+        std::cerr << "Usage: " << argv[0] << " <video_path> <fps> <altitude_m> <fov_camera_deg> <video_width_px> <video_height_px>\n";
+        std::cerr << "Example: ./nav_of_main flight.mp4 30 28.0 3.6 1920 1080\n";
+        return 1;
+    }
+
+    std::string videoPath = argv[1];
+    float fps = std::stof(argv[2]);
+    float altitude = std::stof(argv[3]);
+    double fov = std::stod(argv[4]);
+    int width = std::stoi(argv[5]);
+    int height = std::stoi(argv[6]);
+
     OpticalFlowProcessor processor;
-    processor.setCameraParams(3.6, {1920, 1080});
-    processor.setFrameRate(30.0f);
+    processor.setCameraParams(fov, {width, height});
+    processor.setFrameRate(fps);
 
-    double altitude = 28.0;
     double lastTime = static_cast<double>(cv::getTickCount());
 
-    cv::VideoCapture cap("C:/Projekty/FLORA-2/data/Mar-9th-08-31AM-video-processed.mp4");
-    if (!cap.isOpened()) return 1;
+    cv::VideoCapture cap(videoPath);
+    if (!cap.isOpened()) {
+        std::cerr << "Error: Could not open video file: " << videoPath << std::endl;
+        return 2;
+    }
 
     cv::Mat frame;
     while (cap.read(frame)) {
         double now = static_cast<double>(cv::getTickCount());
-        double dt = (now - lastTime) / cv::getTickFrequency();
+        double deltaTime = (now - lastTime) / cv::getTickFrequency();
         lastTime = now;
 
-        if (processor.update(frame, dt, altitude)) {
+        if (processor.update(frame, deltaTime, altitude)) {
             Vector3D v = processor.getVelocity();
-            std::cout << "Speed: " << v.x << " m/s\n";
+            std::cout << "Speed: " << v.x << " m/s" << std::endl;
         }
-
-        cv::imshow("Video", frame);
-        if (cv::waitKey(1) == 27) break;
     }
+
     return 0;
 }

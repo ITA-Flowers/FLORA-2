@@ -33,7 +33,7 @@ int ofProcess(Config config, OpticalFlowProcessor& ofProcessor) {
     while (cap.read(frame)) {
         if (ofProcessor.update(frame, config.getAltitudeM())) {
             Vector3D v = ofProcessor.getVelocity();
-            std::cout << "         - frame: " << frameCount << "\tspeed: " << v.getX() << " m/s\r\n";
+            std::cout << "         - frame: " << frameCount << "\tspeed: " << v.getX() << " m/s\r" << std::flush;
             outFile << frameCount << "," << v.getX() << "\n";
         }
         frameCount++;

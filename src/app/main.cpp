@@ -1,7 +1,7 @@
 // main.cpp
 #include "Config.hpp"
 #include "../core/Vector3D.hpp"
-#include "../core/OpticalFlowProcessor.hpp"
+#include "../nav-of/core/OpticalFlowProcessor.hpp"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <fstream>
@@ -29,8 +29,6 @@ int ofProcess(Config config, OpticalFlowProcessor& ofProcessor) {
     cv::Mat frame;
     int frameCount = 0;
 
-    double lastTime = static_cast<double>(cv::getTickCount());
-
     std::cout << "      - processing video frames:" << std::endl;
     while (cap.read(frame)) {
         if (ofProcessor.update(frame, config.getAltitudeM())) {
@@ -51,12 +49,12 @@ int mainProcess(Config config) {
     std::cout << " Initializing:" << std::endl;
     
     // Initialize result variables
-    Vector3D vel_of;
-    Vector3D vel_dr;
-    Vector3D vel_combined;
-    float heading_of = 0.0;
-    float heading_dr = 0.0;
-    float heading_combined = 0.0;
+    // Vector3D vel_of;
+    // Vector3D vel_dr;
+    // Vector3D vel_combined;
+    // float heading_of = 0.0;
+    // float heading_dr = 0.0;
+    // float heading_combined = 0.0;
 
     // Initialize Processors
     // -- Dead Reckoning Processor

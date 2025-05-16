@@ -15,7 +15,7 @@ project(FLORA-2
 option(BUILD_TESTS "Build the test suite" OFF)
 option(USE_EIGEN3 "Use Eigen3 library" ON)
 option(USE_OPENCV "Use OpenCV library" ON)
-option(ENABLE_WARNINGS "Enable all warnings" ON)
+option(ENABLE_WARNINGS "Enable all warnings" OFF)
 
 # ========================
 # Module Path

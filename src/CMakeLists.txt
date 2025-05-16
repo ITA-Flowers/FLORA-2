@@ -74,6 +74,9 @@ add_executable(flora2
     app/main.cpp
 )
 
+message(STATUS "OpenCV include dirs: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
+
 # Linking the application with the components library
 target_link_libraries(flora2
     PRIVATE

@@ -5,10 +5,14 @@
 build/
 build-*/
 
+# Data direcotry
+data/
+
 # Python
 .venv/
 venv/
 __pycache__/
+venv-py39/
 
 # Docs
 *.drawio.bkp

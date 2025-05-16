@@ -46,7 +46,7 @@ int ofProcess(Config config, OpticalFlowProcessor& ofProcessor) {
 }
 
 int mainProcess(Config config) {
-    std::cout << " Initializing:" << std::endl;
+    std::cout << "\n Initializing:" << std::endl;
     
     // Initialize result variables
     // Vector3D vel_of;
@@ -71,7 +71,7 @@ int mainProcess(Config config) {
 
     // Process 
     if (config.isOnlyOF()) {
-        std::cout << "  - Processing only Optical Flow..." << std::endl;
+        std::cout << "  - Processing only Optical Flow...\n" << std::endl;
         return ofProcess(config, ofProcessor);
 
     } else if (config.isOnlyDR()) {

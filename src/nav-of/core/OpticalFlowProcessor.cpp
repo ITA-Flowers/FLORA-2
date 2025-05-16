@@ -40,7 +40,7 @@ bool OpticalFlowProcessor::update(const cv::Mat& frame, double deltaTime, double
     float rawSpeed = avgMag * metricScale * fps_;
     float filteredSpeed = kalman_.update(rawSpeed);
 
-    currentVelocity_ = {filteredSpeed, 0.0, 0.0};
+    currentVelocity_ = Vector3D(filteredSpeed, 0.0, 0.0);
     confidence_ = 1.0;
 
     prevGray_ = gray.clone();

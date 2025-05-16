@@ -12,7 +12,7 @@ project(FLORA-2
 # ========================
 # Options
 # ========================
-option(BUILD_TESTS "Build the test suite" ON)
+option(BUILD_TESTS "Build the test suite" OFF)
 option(USE_EIGEN3 "Use Eigen3 library" ON)
 option(USE_OPENCV "Use OpenCV library" ON)
 option(ENABLE_WARNINGS "Enable all warnings" ON)

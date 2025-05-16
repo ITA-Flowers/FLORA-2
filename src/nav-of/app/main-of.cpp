@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
 
         if (processor.update(frame, deltaTime, altitude)) {
             Vector3D v = processor.getVelocity();
-            std::cout << "Frame: " << frameCount << "\tSpeed: " << v.x << " m/s" << std::endl;
-            outFile << frameCount << "," << v.x << "\n";
+            std::cout << "Frame: " << frameCount << "\tSpeed: " << v.getX() << " m/s" << std::endl;
+            outFile << frameCount << "," << v.getX() << "\n";
         }
         frameCount++;
     }

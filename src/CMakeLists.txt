@@ -50,31 +50,23 @@ target_include_directories(flora_nav-dr
 )
 
 # -- Flora Nav-OF (Optical Flow)
-# add_library(flora_nav-of
-#     # nav-of/...
-# )
+set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
 
-# target_include_directories(flora_nav-of
-#     PUBLIC 
-#         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-#         $<INSTALL_INTERFACE:include>
-#     PRIVATE
-#         ${CMAKE_CURRENT_SOURCE_DIR}/internal
-# )
+add_library(flora_nav-of
+    nav-of/algo/farneback_gpu.cpp
+    nav-of/algo/horn_schunck.cpp
+    nav-of/algo/utils.cpp
+    nav-of/core/OpticalFlow.cpp
+)
 
-
-# -- Flora Nav-SF (Sensor Fusion)
-# add_library(flora_nav-sf
-#     # nav-sf/...
-# )
-
-# target_include_directories(flora_nav-sf
-#     PUBLIC 
-#         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-#         $<INSTALL_INTERFACE:include>
-#     PRIVATE
-#         ${CMAKE_CURRENT_SOURCE_DIR}/internal
-# )
+target_include_directories(flora_nav-of
+    PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+        ${OpenCV_INCLUDE_DIRS}
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/internal
+)
 
 # Adding the main application executable
 add_executable(flora2
@@ -86,7 +78,8 @@ target_link_libraries(flora2
     PRIVATE
         flora_app
         flora_core
+        flora_nav-of
+        ${OpenCV_LIBS}
         # flora_nav-dr
-        # flora_nav-of
         # flora_nav-sf
 )

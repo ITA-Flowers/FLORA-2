@@ -33,7 +33,7 @@ int ofProcess(Config config, OpticalFlowProcessor& ofProcessor) {
     while (cap.read(frame)) {
         if (ofProcessor.update(frame, config.getAltitudeM())) {
             Vector3D v = ofProcessor.getVelocity();
-            std::cout << "         - frame: " << frameCount << "\tspeed: " << v.getX() << " m/s\r\n";
+            std::cout << "         - frame: " << frameCount << "\tspeed: " << v.getX() << " m/s\r" << std::flush;
             outFile << frameCount << "," << v.getX() << "\n";
         }
         frameCount++;
@@ -75,14 +75,14 @@ int mainProcess(Config config) {
         return ofProcess(config, ofProcessor);
 
     } else if (config.isOnlyDR()) {
-        std::cout << "  - Processing only Dead Reckoning..." << std::endl;
+        std::cout << "  - Processing only Dead Reckoning...\n" << std::endl;
         
-        std::cerr << "  [!] Dead Reckoning is not implemented yet." << std::endl;
+        std::cerr << "  [!] Dead Reckoning is not implemented yet.\n" << std::endl;
         return 1;
     } else {
-        std::cout << "  - Processing both Optical Flow and Dead Reckoning..." << std::endl;
+        std::cout << "  - Processing both Optical Flow and Dead Reckoning...\n" << std::endl;
         
-        std::cerr << "  [!] Dead Reckoning is not implemented yet." << std::endl;
+        std::cerr << "  [!] Dead Reckoning is not implemented yet.\n" << std::endl;
         return 1;
     }
 }

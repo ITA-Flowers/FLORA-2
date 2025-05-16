@@ -33,11 +33,7 @@ int ofProcess(Config config, OpticalFlowProcessor& ofProcessor) {
 
     std::cout << "      - processing video frames:" << std::endl;
     while (cap.read(frame)) {
-        double now = static_cast<double>(cv::getTickCount());
-        double deltaTime = (now - lastTime) / cv::getTickFrequency();
-        lastTime = now;
-
-        if (ofProcessor.update(frame, deltaTime, config.getAltitudeM())) {
+        if (ofProcessor.update(frame, config.getAltitudeM())) {
             Vector3D v = ofProcessor.getVelocity();
             std::cout << "         - frame: " << frameCount << "\tspeed: " << v.getX() << " m/s\r\n";
             outFile << frameCount << "," << v.getX() << "\n";

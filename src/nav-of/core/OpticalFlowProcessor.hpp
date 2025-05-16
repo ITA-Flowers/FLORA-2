@@ -6,7 +6,7 @@ class OpticalFlowProcessor : public IOFProcessor {
 public:
     OpticalFlowProcessor();
 
-    bool update(const cv::Mat& frame, double deltaTime, double altitude) override;
+    bool update(const cv::Mat& frame, double altitude) override;
 
     Vector3D getVelocity() const override;
     double getHeading() const override;

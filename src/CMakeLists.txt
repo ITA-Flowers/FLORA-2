@@ -56,7 +56,7 @@ add_library(flora_nav-of
     nav-of/algo/farneback_gpu.cpp
     nav-of/algo/horn_schunck.cpp
     nav-of/algo/utils.cpp
-    nav-of/core/OpticalFlow.cpp
+    nav-of/core/OpticalFlowProcessor.cpp
 )
 
 target_include_directories(flora_nav-of
@@ -64,6 +64,7 @@ target_include_directories(flora_nav-of
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
         ${OpenCV_INCLUDE_DIRS}
+        /usr/local/include/opencv4
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/internal
 )

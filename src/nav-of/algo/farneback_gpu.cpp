@@ -3,36 +3,35 @@
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudawarping.hpp>
 #include <opencv2/core/cuda.hpp>
+#include <cmath>
 
-float computeFarnebackGpuMagnitude(const cv::Mat& prevFrame, const cv::Mat& currFrame) {
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+float computeFarnebackGpuMagnitude(const cv::Mat& prevFrame, const cv::Mat& currFrame, int scaledHeight) {
+    int scaledWidth = static_cast<int>(prevFrame.cols * (scaledHeight / static_cast<float>(prevFrame.rows)));
+
     cv::Mat prevSmall, currSmall;
-    cv::resize(prevFrame, prevSmall, cv::Size(640, 360));
-    cv::resize(currFrame, currSmall, cv::Size(640, 360));
+    cv::resize(prevFrame, prevSmall, cv::Size(scaledWidth, scaledHeight));
+    cv::resize(currFrame, currSmall, cv::Size(scaledWidth, scaledHeight));
 
     cv::Mat prevGray, currGray;
-
     if (prevSmall.channels() == 3)
         cv::cvtColor(prevSmall, prevGray, cv::COLOR_BGR2GRAY);
     else
-        prevGray = prevSmall.clone();
+        prevGray = prevSmall;
 
     if (currSmall.channels() == 3)
         cv::cvtColor(currSmall, currGray, cv::COLOR_BGR2GRAY);
     else
-        currGray = currSmall.clone();
+        currGray = currSmall;
 
     cv::cuda::GpuMat d_prev(prevGray);
     cv::cuda::GpuMat d_curr(currGray);
 
-    cv::Ptr<cv::cuda::FarnebackOpticalFlow> fb = cv::cuda::FarnebackOpticalFlow::create(
-        5,    // numLevels
-        0.5,  // pyrScale
-        false,  // fastPyramids
-        13,   // winSize
-        3,    // numIters
-        5,    // polyN
-        1.1,  // polySigma
-        0     // flags
+    auto fb = cv::cuda::FarnebackOpticalFlow::create(
+        5, 0.5, false, 13, 3, 5, 1.1, 0
     );
 
     cv::cuda::GpuMat flowGpu;

@@ -1,4 +1,5 @@
 #pragma once
 #include <opencv2/core.hpp>
 
-float computeFarnebackGpuMagnitude(const cv::Mat& prevGray, const cv::Mat& currGray);
+float computeFarnebackGpuMagnitude(const cv::Mat& prevFrame, const cv::Mat& currFrame, int scaledHeight);
+

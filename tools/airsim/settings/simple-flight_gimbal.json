@@ -22,8 +22,8 @@
     "CaptureSettings": [
       {
         "ImageType": 0,
-        "Width": 1280,
-        "Height": 720,
+        "Width": 320,
+        "Height": 240,
         "FOV_Degrees": 90,
         "AutoExposureSpeed": 100,
         "AutoExposureBias": 0,
@@ -34,12 +34,23 @@
         "ProjectionMode": "",
         "OrthoWidth": 5.12
       }
-    ]
+    ],
+    "Gimbal": {
+      "Stabilization": 0.8,
+      "Pitch": -90,
+      "Roll": 0,
+      "Yaw": 0
+    }
   },
   "Vehicles": {
     "SimpleFlight": {
       "VehicleType": "SimpleFlight",
       "Sensors": {
+        "Gimbal": {
+          "SensorType": 2,
+          "Enabled": true,
+          "Pitch": 90.0, "Roll": 0.0, "Yaw": 0.0
+        },
         "Imu": {
           "SensorType": 2,
           "Enabled": true,
@@ -76,7 +87,7 @@
               "TargetGamma": 1.0
             }
           ],
-          "X": 0.0, "Y": 0.0, "Z": 0.0,
+          "X": 0.0, "Y": 0.0, "Z": 0.5,
           "Pitch": 90.0, "Roll": 0.0, "Yaw": 0.0
         }
       },

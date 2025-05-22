@@ -24,12 +24,42 @@ public:
     bool isShowVersion() const { return showVersion; }
     
     bool isShowHelp() const { return showHelp; }
+
+    bool isOnlyOF() const { return onlyOF; }
+
+    bool isOnlyDR() const { return onlyDR; }
+
+    bool isBoth() const { return !onlyOF && !onlyDR; }
     
     const std::string& getInputLogFile() const { return inputLogFile; }
     
     const std::string& getInputVideoFile() const { return inputVideoFile; }
 
     const std::string& getOutputFile() const { return outputFile; }
+
+    int getVideoFps() const { return videoFps; }
+
+    int getVideoFovCameraDeg() const { return videoFovCameraDeg; }
+
+    int getVideoWidthPx() const { return videoWidthPx; }
+
+    int getVideoHeightPx() const { return videoHeightPx; }
+
+    int getAltitudeM() const { return altitudeM; }
+
+    void setVideoFps(int fps) { videoFps = fps; }
+
+    void setVideoFovCameraDeg(int fov) { videoFovCameraDeg = fov; }
+
+    void setVideoWidthPx(int width) { videoWidthPx = width; }
+
+    void setVideoHeightPx(int height) { videoHeightPx = height; }
+
+    void setAltitudeM(int altitude) { altitudeM = altitude; }
+
+    void setOnlyOF(bool only) { onlyOF = only; }
+
+    void setOnlyDR(bool only) { onlyDR = only; }
     
     void setInputLogFile(const std::string& file) { inputLogFile = file; }
     
@@ -39,11 +69,26 @@ public:
 
 private:
     const std::string APP_NAME = "FLORA-2";
-    const std::string VERSION = "1.0.0";
+    const std::string VERSION = "0.1.0";
 
+    // std::cerr << "Usage: " << argv[0] << " <video_path> <fps> <altitude_m> <fov_camera_deg> <video_width_px> <video_height_px>\n";
+
+    // Files
     std::string inputLogFile;
     std::string inputVideoFile;
     std::string outputFile;
+    
+    // Video parameters
+    int videoFps = 30; // default value
+    int videoFovCameraDeg = 91; // default value
+    int videoWidthPx = 1920; // default value
+    int videoHeightPx = 1080; // default value
+    int altitudeM = 100; // default value
+    
+    // Flags
+    bool onlyOF;
+    bool onlyDR;
+
     bool showVersion;
     bool showHelp;
 };

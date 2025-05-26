@@ -1,87 +1,22 @@
 #include <iostream>
+#include <filesystem>
 #include "Config.hpp"
 #include "../core/NavProcessor.hpp"
 
 
-// int mainProcess(Config config) {
-//     std::cout << "\n Initializing:" << std::endl;
-
-//     std::cout << "  [*] Initializing Dead Reckoning Processor : ";
-//     std::cout << "Not implemented yet. - skip" << std::endl;
-
-//     std::cout << "  [*] Initializing Optical Flow Processor : ";
-//     OpticalFlowProcessor ofProcessor;
-//     ofProcessor.setCameraParams(config.getVideoFovCameraDeg(), {config.getVideoWidthPx(), config.getVideoHeightPx()});
-//     ofProcessor.setFrameRate(config.getVideoFps());
-//     std::cout << "OK" << std::endl << std::endl;
-
-//     std::cout << "  [*] Initializing Dead Reckoning Processor : ";
-//     DeadReckoningProcessor drProcessor;
-//     std::cout << "OK" << std::endl << std::endl;
-
-//     std::cout << "  [*] Processing..." << std::endl;
-//     std::cout << "      - opening input file: " << config.getInputLogFile() << std::endl;
-//     std::ifstream inFile(config.getInputLogFile());
-//     if (!inFile.is_open()) {
-//         std::cerr << "[Error]: Could not open input log file: " << config.getInputLogFile() << std::endl;
-//         return 1;
-//     }
-
-//     std::cout << "      - opening video file: " << config.getInputVideoFile() << std::endl;
-//     cv::VideoCapture cap(config.getInputVideoFile());
-//     if (!cap.isOpened()) {
-//         std::cerr << "[Error]: Could not open video file: " << config.getInputVideoFile() << std::endl;
-//         return 2;
-//     }
-
-//     // std::string outputPath = "../../data/" + config.getOutputFile();
-//     std::string outputPath = config.getOutputFile();
-//     std::cout << "      - opening output file: " << outputPath << std::endl;
-//     std::ofstream outFile(outputPath);
-
-//     if (!outFile.is_open()) {
-//         std::cerr << "[Error]: Could not open output file: " << outputPath << std::endl;
-//         return 3;
-//     }
-//     std::cout << "      - writing header to output file." << std::endl;
-//     outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon\n";
-
-//     cv::Mat frame;
-//     int frameCount = 0;
-
-//     std::cout << "      - processing video frames:" << std::endl;
-//     while (cap.read(frame) && inFile.eof() == false) {
-//         // Read the next line from the log file
-//         std::string line;
-
-
-//         // TODO: altitude and heading should be read from the log file
-//         if (ofProcessor.update(frame, config.getAltitudeM())) {
-//             Vector3D v = ofProcessor.getVelocity();
-//             std::cout << "        - frame: " << frameCount << "\tspeed: " << v.getX() << " m/s\r" << std::flush;
-//             outFile << frameCount << "," << v.getX() << "\n";
-//         }
-//         frameCount++;
-//     }
-
-//     std::cout << std::endl << "      - finished processing." << std::endl;
-//     outFile.close();
-
-//     return 0;
-// }
 int initNavProcessor(NavProcessor& navProcessor, const Config& config) {
     // Set camera parameters
     navProcessor.setCameraParams(config.getVideoFovCameraDeg(), {config.getVideoWidthPx(), config.getVideoHeightPx()});
     navProcessor.setFrameRate(config.getVideoFps());
 
     // Initialize input files
-    if (navProcessor.initInput(config.getInputDir()) != 0) {
+    if (navProcessor.initInput(std::filesystem::path(config.getInputDir())) != 0) {
         std::cerr << "Error: Could not initialize input files." << std::endl;
         return 1;
     }
 
     // Initialize output files
-    if (navProcessor.initOutput(config.getOutputDir()) != 0) {
+    if (navProcessor.initOutput(std::filesystem::path(config.getOutputDir())) != 0) {
         std::cerr << "Error: Could not initialize output files." << std::endl;
         return 2;
     }

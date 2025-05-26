@@ -60,13 +60,13 @@ int NavProcessor::process(void) {
     std::cout << "OK" << std::endl;
 
     // Open input files
-    std::cout << "    - opening input files: " << inputLogFile_ << ", " << inputVideoFile_ << std::endl;
+    std::cout << "    - opening input files:\n      - " << inputLogFile_ << ",\n      - " << inputVideoFile_ << std::endl;
     std::ifstream inFile(inputLogFile_);
     if (!inFile.is_open()) {
         std::cerr << "Error: Could not open input log file: " << inputLogFile_ << std::endl;
         return -1;
     }
-    std::cout << "    - input files opened successfully." << std::endl;
+    std::cout << "      * input files opened successfully." << std::endl;
 
     // Read the header line from the log file
     std::cout << "    - reading header from input log file: " << inputLogFile_ << std::endl;
@@ -79,8 +79,19 @@ int NavProcessor::process(void) {
     std::unordered_map<std::string, size_t> columnIndex;
     std::vector<std::string> headers;
     std::stringstream ss(headerLine);
+    size_t idx = 0;
+    
+    while (std::getline(ss, column, ',')) {
+        columnIndex[column] = idx++;
+    }
+    
+    if (columnIndex.count("vx") == 0 || columnIndex.count("vy") == 0 || columnIndex.count("z") == 0) {
+        std::cerr << "Error: Required columns not found in CSV header." << std::endl;
+        return -1;
+    }
+
     std::string column;
-    std::cout << "    - header read successfully." << std::endl;
+    std::cout << "      * header read successfully." << std::endl;
 
     // Open video file
     std::cout << "    - opening video file: " << inputVideoFile_ << std::endl;
@@ -90,7 +101,7 @@ int NavProcessor::process(void) {
         inFile.close();
         return -1;
     }
-    std::cout << "    - video file opened successfully." << std::endl;
+    std::cout << "      * video file opened successfully." << std::endl;
 
     // Open output file
     std::cout << "    - opening output file: " << outputLogFile_ << std::endl;
@@ -99,12 +110,12 @@ int NavProcessor::process(void) {
         std::cerr << "Error: Could not open output file: " << outputLogFile_ << std::endl;
         return -1;
     }
-    std::cout << "    - output file opened successfully." << std::endl;
+    std::cout << "      * output file opened successfully." << std::endl;
 
     // Write header to output file
     std::cout << "    - writing header to output file." << std::endl;
     outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon\n";
-    std::cout << "    - header written successfully." << std::endl;
+    std::cout << "      * header written successfully." << std::endl;
 
     // Process video frames and log data
     std::cout << "    - processing:" << std::endl;
@@ -138,6 +149,7 @@ int NavProcessor::process(void) {
             heading_deg += 360.0; // Normalize to [0, 360)
         }
 
+        frameCount++;
         if (!opticalFlowProcessor_.update(frame, alt)) {
             std::cerr << "Error: Optical flow update failed for frame " << frameCount << "." << std::endl;
             continue;

@@ -7,8 +7,8 @@ class NavProcessor {
 public:
     NavProcessor() = default;
 
-    void setCameraParams(int fovDeg, const cv::Size& frameSize) {
-        opticalFlowProcessor_.setCameraParams(fovDeg, frameSize);
+    void setCameraParams(int fovDeg, const std::pair<int, int>& resolution) {
+        opticalFlowProcessor_.setCameraParams(fovDeg, resolution);
     }
 
     void setFrameRate(int fps) {

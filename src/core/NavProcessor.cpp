@@ -18,10 +18,18 @@ int NavProcessor::initInput(const std::filesystem::path& inputDir) {
     std::filesystem::path logFilename = fileBasename_ + "_vehicle_local_position_0.csv";
     inputLogFile_ = logSubdir / logFilename;
 
+    std::filesystem::path gpsLogFilename = fileBasename_ + "_vehicle_global_position_0.csv";
+    inputGPSFile_ = logSubdir / gpsLogFilename;
+
     inputVideoFile_ = inputDir / ("video_" + fileBasename_.substr(4) + ".mp4");
 
     if (!std::filesystem::exists(inputLogFile_)) {
         std::cerr << "Error: Input log file does not exist: " << inputLogFile_ << std::endl;
+        return -1;
+    }
+
+    if (!std::filesystem::exists(inputGPSFile_)) {
+        std::cerr << "Error: Input GPS file does not exist: " << inputGPSFile_ << std::endl;
         return -1;
     }
 
@@ -60,10 +68,16 @@ int NavProcessor::process(void) {
     std::cout << "OK" << std::endl;
 
     // Open input files
-    std::cout << "    - opening input files:\n      - " << inputLogFile_ << ",\n      - " << inputVideoFile_ << std::endl;
+    std::cout << "    - opening input files:\n      - " << inputLogFile_ << ",\n      - " << inputVideoFile_ << ",\n" << inputGPSFile_ << std::endl;
     std::ifstream inFile(inputLogFile_);
+    std::ifstream gpsFile(inputGPSFile_);
     if (!inFile.is_open()) {
         std::cerr << "Error: Could not open input log file: " << inputLogFile_ << std::endl;
+        return -1;
+    }
+    if (!gpsFile.is_open()) {
+        std::cerr << "Error: Could not open input GPS file: " << inputGPSFile_ << std::endl;
+        inFile.close();
         return -1;
     }
     std::cout << "      * input files opened successfully." << std::endl;
@@ -74,6 +88,7 @@ int NavProcessor::process(void) {
     if (!std::getline(inFile, headerLine)) {
         std::cerr << "Error: Could not read header from input log file." << std::endl;
         inFile.close();
+        gpsFile.close();
         return -1;
     }
     std::unordered_map<std::string, size_t> columnIndex;
@@ -88,10 +103,36 @@ int NavProcessor::process(void) {
     
     if (columnIndex.count("vx") == 0 || columnIndex.count("vy") == 0 || columnIndex.count("z") == 0) {
         std::cerr << "Error: Required columns not found in CSV header." << std::endl;
+        inFile.close();
+        gpsFile.close();
+        return -1;
+    }
+
+    // Read the header line from the GPS log file
+    std::cout << "    - reading header from gps log file: " << inputLogFile_ << std::endl;
+    std::string gpsHeaderLine;
+    if (!std::getline(gpsFile, gpsHeaderLine)) {
+        std::cerr << "Error: Could not read header from gps log file." << std::endl;
+        inFile.close();
+        gpsFile.close();
+        return -1;
+    }
+    std::unordered_map<std::string, size_t> gpsColumnIndex;
+    std::vector<std::string> gpsHeaders;
+    std::stringstream ssg(gpsHeaderLine);
+    size_t idxg = 0;
+    std::string gpsColumn;
+    
+    while (std::getline(ssg, gpsColumn, ',')) {
+        gpsColumnIndex[gpsColumn] = idxg++;
+    }
+    
+    if (gpsColumnIndex.count("lat") == 0 || gpsColumnIndex.count("lon") == 0) {
+        std::cerr << "Error: Required columns not found in GPS CSV header." << std::endl;
         return -1;
     }
     
-    std::cout << "      * header read successfully." << std::endl;
+    std::cout << "      * headers read successfully." << std::endl;
 
     // Open video file
     std::cout << "    - opening video file: " << inputVideoFile_ << std::endl;
@@ -114,8 +155,8 @@ int NavProcessor::process(void) {
 
     // Write header to output file
     std::cout << "    - writing header to output file." << std::endl;
-    std::cout << std::fixed << std::setprecision(8);
-    outFile << std::fixed << std::setprecision(8);
+    std::cout << std::fixed << std::setprecision(10);
+    outFile << std::fixed << std::setprecision(10);
     outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon\n";
     std::cout << "      * header written successfully." << std::endl;
 
@@ -136,10 +177,6 @@ int NavProcessor::process(void) {
             values.push_back(cell);
         }
 
-        double ref_timestamp = std::stod(values[columnIndex["ref_timestamp"]]);
-        double ref_lat = std::stod(values[columnIndex["ref_lat"]]);
-        double ref_lon = std::stod(values[columnIndex["ref_lon"]]);
-
         double timestamp = std::stod(values[columnIndex["timestamp"]]);
         double vx = std::stod(values[columnIndex["vx"]]);
         double vy = std::stod(values[columnIndex["vy"]]);
@@ -150,6 +187,20 @@ int NavProcessor::process(void) {
         if (heading_deg < 0) {
             heading_deg += 360.0; // Normalize to [0, 360)
         }
+
+        std::string gpsLine;
+        if (!std::getline(gpsFile, gpsLine)) break;
+
+        std::stringstream gpsLineStream(gpsLine);
+        std::string gpsCell;
+        std::vector<std::string> gpsValues;
+
+        while (std::getline(gpsLineStream, gpsCell, ',')) {
+            values.push_back(gpsCell);
+        }
+
+        double ref_lat = std::stod(gpsValues[gpsColumnIndex["lat"]]);
+        double ref_lon = std::stod(gpsValues[gpsColumnIndex["lon"]]);
 
         frameCount++;
         if (!opticalFlowProcessor_.update(frame, alt)) {

@@ -1,15 +1,17 @@
 #include "NavProcessor.hpp"
 
 int NavProcessor::initInput(const std::filesystem::path& inputDir) {
-    // Initialize input paths based on the provided directory
     fileBasename_ = inputDir.filename().string();
     if (fileBasename_.empty()) {
         std::cerr << "Error: Input directory name is empty." << std::endl;
         return -1;
     }
 
-    inputLogFile_ = inputDir / (inputDir.filename().string() + "_converted_trimmed" / (inputDir.filename().string() + "_vehicle_local_position_0.csv");
-    inputVideoFile_ = inputDir / "video_" + fileBasename_.substr(4) + ".mp4";
+    std::filesystem::path logSubdir = inputDir / (fileBasename_ + "_converted_trimmed");
+    std::filesystem::path logFilename = fileBasename_ + "_vehicle_local_position_0.csv";
+    inputLogFile_ = logSubdir / logFilename;
+
+    inputVideoFile_ = inputDir / ("video_" + fileBasename_.substr(4) + ".mp4");
 
     if (!std::filesystem::exists(inputLogFile_)) {
         std::cerr << "Error: Input log file does not exist: " << inputLogFile_ << std::endl;
@@ -25,7 +27,6 @@ int NavProcessor::initInput(const std::filesystem::path& inputDir) {
 }
 
 int NavProcessor::initOutput(const std::filesystem::path& outputDir) {
-    // Initialize output path based on the provided directory
     if (fileBasename_.empty()) {
         std::cerr << "Error: File basename is empty. Please initialize input first." << std::endl;
         return -1;
@@ -37,13 +38,10 @@ int NavProcessor::initOutput(const std::filesystem::path& outputDir) {
     }
 
     outputLogFile_ = outputDir / (fileBasename_ + ".csv");
-    if (!std::filesystem::exists(outputLogFile_.parent_path())) {
-        std::cerr << "Error: Output log file parent directory does not exist." << std::endl;
-        return -1;
-    }
 
     return 0;
 }
+
 
 int NavProcessor::process(void) {
     // Check if input files are initialized

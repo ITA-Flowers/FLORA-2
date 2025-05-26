@@ -68,7 +68,7 @@ int NavProcessor::process(void) {
     std::cout << "OK" << std::endl;
 
     // Open input files
-    std::cout << "    - opening input files:\n      - " << inputLogFile_ << ",\n      - " << inputVideoFile_ << ",\n" << inputGPSFile_ << std::endl;
+    std::cout << "    - opening input files:\n        - " << inputLogFile_ << ",\n        - " << inputVideoFile_ << ",\n        - " << inputGPSFile_ << std::endl;
     std::ifstream inFile(inputLogFile_);
     std::ifstream gpsFile(inputGPSFile_);
     if (!inFile.is_open()) {
@@ -109,7 +109,7 @@ int NavProcessor::process(void) {
     }
 
     // Read the header line from the GPS log file
-    std::cout << "    - reading header from gps log file: " << inputLogFile_ << std::endl;
+    std::cout << "    - reading header from gps log file: " << inputGPSFile_ << std::endl;
     std::string gpsHeaderLine;
     if (!std::getline(gpsFile, gpsHeaderLine)) {
         std::cerr << "Error: Could not read header from gps log file." << std::endl;
@@ -187,6 +187,8 @@ int NavProcessor::process(void) {
         if (heading_deg < 0) {
             heading_deg += 360.0; // Normalize to [0, 360)
         }
+        std::cout << "vx[m/s]: " << vx << ", vy[m/s]: " << vy << ", alt[m]: " << alt
+                  << ", heading[deg]: " << heading_deg << std::endl;
 
         std::string gpsLine;
         if (!std::getline(gpsFile, gpsLine)) break;
@@ -201,6 +203,12 @@ int NavProcessor::process(void) {
 
         double ref_lat = std::stod(gpsValues[gpsColumnIndex["lat"]]);
         double ref_lon = std::stod(gpsValues[gpsColumnIndex["lon"]]);
+        std::cout << "ref_lat: " << ref_lat << ", ref_lon: " << ref_lon << std::endl;
+        if (ref_lat == 0.0 && ref_lon == 0.0) {
+            std::cerr << "Warning: GPS coordinates are zero, skipping frame " << frameCount << "." << std::endl;
+            continue;
+        }
+        std::cout << std::endl;
 
         frameCount++;
         if (!opticalFlowProcessor_.update(frame, alt)) {
@@ -232,21 +240,21 @@ int NavProcessor::process(void) {
                 << ref_lat << ","
                 << ref_lon << "\n";
 
-        if (frameCount != 1) {
-            std::cout << "\033[8A";
-            for (int i = 0; i < 8; ++i) std::cout << "\033[2K\033[1B";
-            std::cout << "\033[8A";
-        }
+        // if (frameCount != 1) {
+        //     std::cout << "\033[8A";
+        //     for (int i = 0; i < 8; ++i) std::cout << "\033[2K\033[1B";
+        //     std::cout << "\033[8A";
+        // }
         
-        std::cout << "      frame:    " << frameCount << "\n"
-                << "      speed:    " << speed_mps << " m/s\n"
-                << "      altitude: " << alt << " m\n"
-                << "      heading:  " << heading_deg << " deg\n"
-                << "      dr_lat:   " << gpsData.getLatitude() << "\n"
-                << "      dr_lon:   " << gpsData.getLongitude() << "\n"
-                << "      gps_lat:  " << ref_lat << "\n"
-                << "      gps_lon:  " << ref_lon << "\n"
-                << std::flush;
+        // std::cout << "      frame:    " << frameCount << "\n"
+        //         << "      speed:    " << speed_mps << " m/s\n"
+        //         << "      altitude: " << alt << " m\n"
+        //         << "      heading:  " << heading_deg << " deg\n"
+        //         << "      dr_lat:   " << gpsData.getLatitude() << "\n"
+        //         << "      dr_lon:   " << gpsData.getLongitude() << "\n"
+        //         << "      gps_lat:  " << ref_lat << "\n"
+        //         << "      gps_lon:  " << ref_lon << "\n"
+        //         << std::flush;
     }
 
     outFile.close();

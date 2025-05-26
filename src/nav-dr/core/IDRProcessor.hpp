@@ -7,5 +7,5 @@ public:
   
     virtual GPSData getGPSData() const = 0;
 
-    virtual bool update(GPSData lastData, double altitude, double heading, double speed) = 0;
+    virtual bool update(GPSData lastData, double altitude, double heading, double speed, double dt) = 0;
 };

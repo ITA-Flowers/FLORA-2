@@ -6,9 +6,8 @@ class Config {
 
 public:
     Config()
-        : inputLogFile("")
-        , inputVideoFile("")
-        , outputFile("")
+        : inputDir("")
+        , outputDir("")
         , showVersion(false)
         , showHelp(false)
     {}
@@ -25,11 +24,9 @@ public:
     
     bool isShowHelp() const { return showHelp; }
     
-    const std::string& getInputLogFile() const { return inputLogFile; }
-    
-    const std::string& getInputVideoFile() const { return inputVideoFile; }
+    const std::string& getInputDir() const { return inputDir; }
 
-    const std::string& getOutputFile() const { return outputFile; }
+    const std::string& getOutputDir() const { return outputDir; }
 
     int getVideoFps() const { return videoFps; }
 
@@ -51,22 +48,17 @@ public:
 
     void setAltitudeM(int altitude) { altitudeM = altitude; }
     
-    void setInputLogFile(const std::string& file) { inputLogFile = file; }
-    
-    void setInputVideoFile(const std::string& file) { inputVideoFile = file; }
+    void setInputDir(const std::string& dir) { inputDir = dir; }
 
-    void setOutputFile(const std::string& file) { outputFile = file; }
+    void setOutputFile(const std::string& file) { outputDir = file; }
 
 private:
     const std::string APP_NAME = "FLORA-2";
-    const std::string VERSION = "0.1.0";
-
-    // std::cerr << "Usage: " << argv[0] << " <video_path> <fps> <altitude_m> <fov_camera_deg> <video_width_px> <video_height_px>\n";
+    const std::string VERSION = "0.2.1";
 
     // Files
-    std::string inputLogFile;
-    std::string inputVideoFile;
-    std::string outputFile;
+    std::string inputDir;
+    std::string outputDir;
     
     // Video parameters
     int videoFps = 30; // default value

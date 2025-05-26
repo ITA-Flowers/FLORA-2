@@ -1,5 +1,13 @@
 #pragma once
 
+#include <filesystem>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <unordered_map>
+#include <vector>
+#include <cmath>
+
 #include "../nav-dr/core/DeadReckoningProcessor.hpp"
 #include "../nav-of/core/OpticalFlowProcessor.hpp"
 
@@ -15,16 +23,18 @@ public:
         opticalFlowProcessor_.setFrameRate(fps);
     }
 
-    OpticalFlowProcessor& getOpticalFlowProcessor() {
-        return opticalFlowProcessor_;
-    }
+    int initInput(const std::filesystem::path& inputDir);
 
-    DeadReckoningProcessor& getDeadReckoningProcessor() {
-        return deadReckoningProcessor_;
-    }
+    int initOutput(const std::filesystem::path& outputDir);
 
+    int process(void);
 
 private:
     OpticalFlowProcessor opticalFlowProcessor_;
     DeadReckoningProcessor deadReckoningProcessor_;
+
+    std::string fileBasename_;
+    std::filesystem::path inputLogFile_;
+    std::filesystem::path inputVideoFile_;
+    std::filesystem::path outputLogFile_;
 };

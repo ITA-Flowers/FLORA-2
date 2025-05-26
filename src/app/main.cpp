@@ -25,7 +25,10 @@ int initNavProcessor(NavProcessor& navProcessor, const Config& config) {
 }
 
 int doProcessing(NavProcessor& navProcessor, const Config& config) {
-
+    if (navProcessor.process() != 0) {
+        std::cerr << "Error: Processing failed." << std::endl;
+        return 3;
+    }
     return 0; // Placeholder for processing logic
 }
 

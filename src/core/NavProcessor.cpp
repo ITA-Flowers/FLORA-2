@@ -1,10 +1,12 @@
 #include "NavProcessor.hpp"
 
 int NavProcessor::initInput(const std::filesystem::path& inputDir) {
-    std::filesystem::path cleaned = inputDir;
-    if (cleaned.has_filename() && cleaned.filename().empty()) {
-        cleaned = cleaned.parent_path();  // usuń trailing slash
+    std::string dirStr = inputDir.string();
+    if (!dirStr.empty() && dirStr.back() == '/') {
+        dirStr.pop_back();
     }
+
+    std::filesystem::path cleaned(dirStr);
     fileBasename_ = cleaned.filename().string();
 
     if (fileBasename_.empty()) {

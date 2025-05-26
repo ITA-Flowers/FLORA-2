@@ -118,7 +118,7 @@ int NavProcessor::process(void) {
     std::cout << "      * header written successfully." << std::endl;
 
     // Process video frames and log data
-    std::cout << "    - processing:" << std::endl;
+    std::cout << "    - processing:\n" << std::endl;
     cv::Mat frame;
     int frameCount = 0;
 
@@ -185,14 +185,14 @@ int NavProcessor::process(void) {
             std::cout << "\033[8A";
         }
         
-        std::cout << "frame:    " << frameCount << "\n"
-                << "speed:    " << speed_mps << " m/s\n"
-                << "altitude: " << alt << " m\n"
-                << "heading:  " << heading_deg << " deg\n"
-                << "dr_lat:   " << gpsData.getLatitude() << "\n"
-                << "dr_lon:   " << gpsData.getLongitude() << "\n"
-                << "gps_lat:  " << ref_lat << "\n"
-                << "gps_lon:  " << ref_lon << "\n"
+        std::cout << "      frame:    " << frameCount << "\n"
+                << "      speed:    " << speed_mps << " m/s\n"
+                << "      altitude: " << alt << " m\n"
+                << "      heading:  " << heading_deg << " deg\n"
+                << "      dr_lat:   " << gpsData.getLatitude() << "\n"
+                << "      dr_lon:   " << gpsData.getLongitude() << "\n"
+                << "      gps_lat:  " << ref_lat << "\n"
+                << "      gps_lon:  " << ref_lon << "\n"
                 << std::flush;
     }
 

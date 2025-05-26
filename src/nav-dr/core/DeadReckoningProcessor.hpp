@@ -12,7 +12,7 @@ public:
     double getLastSpeed() const { return lastSpeed_; }
     bool hasPreviousData() const { return hasPrevData_; }
 
-    bool update(GPSData lastData, double altitude, double heading, double speed, double dt) override;
+    bool update(GPSData initialGpsData, double altitude, double heading, double speed, double dt) override;
 
 private:
     GPSData gpsData_;

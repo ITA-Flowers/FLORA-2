@@ -9,13 +9,15 @@ GPSData DeadReckoningProcessor::getGPSData() const {
 bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, double heading, double speed, double dt) {
     if (!hasPrevData_) {
         // Initialize with the first valid GPS data
+        if (initialGpsData.getLatitude() < 1.0 || initialGpsData.getLongitude() < 1.0) {
+            std::cerr << "Error: Initial GPS fix is invalid." << std::endl;
+            return false;
+        }
         gpsData_ = initialGpsData;
         lastAltitude_ = altitude;
         lastHeading_ = heading;
         lastSpeed_ = speed;
         hasPrevData_ = true;
-
-        std::cerr << "\n[DEBUG] init GPS: " << initialGpsData.getLatitude() << ", " << initialGpsData.getLongitude() << "\n\n" << std::endl;
 
     } else {
         if (altitude <= 0.0) return false;

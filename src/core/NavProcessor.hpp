@@ -36,6 +36,7 @@ private:
 
     std::string fileBasename_;
     std::filesystem::path inputLogFile_;
+    std::filesystem::path inputGPSFile_;
     std::filesystem::path inputVideoFile_;
     std::filesystem::path outputLogFile_;
 };

@@ -1,7 +1,7 @@
 // GPSData.hpp
 #pragma once
 
-#include "core/Vector3D.hpp"
+#include "core/types/Vector3D.hpp"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

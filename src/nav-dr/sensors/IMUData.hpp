@@ -1,7 +1,7 @@
 // IMUData.hpp
 #pragma once
 
-#include "core/Vector3D.hpp"
+#include "core/types/Vector3D.hpp"
 
 /**
  * @brief Class for storing and managing IMU sensor data

@@ -12,6 +12,14 @@ target_include_directories(flora_app
         ${CMAKE_CURRENT_SOURCE_DIR}/internal
 )
 
+set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
+
+find_package(OpenCV REQUIRED)
+
+message(STATUS "OpenCV version: ${OpenCV_VERSION}")
+message(STATUS "OpenCV include dirs: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
+
 # -- Flore Core
 add_library(flora_core
     core/types/Vector3D.cpp
@@ -24,6 +32,7 @@ target_include_directories(flora_core
     PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
+        ${OpenCV_INCLUDE_DIRS}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/internal
 )
@@ -52,14 +61,6 @@ target_include_directories(flora_nav-dr
 )
 
 # -- Flora Nav-OF (Optical Flow)
-set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
-
-find_package(OpenCV REQUIRED)
-
-message(STATUS "OpenCV version: ${OpenCV_VERSION}")
-message(STATUS "OpenCV include dirs: ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
-
 add_library(flora_nav-of
     nav-of/algo/farneback_gpu.cpp
     nav-of/algo/horn_schunck.cpp

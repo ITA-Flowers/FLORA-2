@@ -159,7 +159,7 @@ int NavProcessor::process(void) {
         double speed_mps = velocity.getX();
 
         if (!deadReckoningProcessor_.update(
-                deadReckoningProcessor_.getGPSData(),
+                GPSData(ref_lat, ref_lon, alt),
                 alt,
                 heading_rad,
                 speed_mps,

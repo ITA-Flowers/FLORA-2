@@ -14,5 +14,7 @@ public:
     virtual void setCameraParams(double fov, const std::pair<int, int>& resolution) = 0;
     virtual void setFrameRate(float fps) = 0;
 
+    virtual float getFrameRate() const = 0;
+
     virtual double getConfidenceScore() const = 0;
 };

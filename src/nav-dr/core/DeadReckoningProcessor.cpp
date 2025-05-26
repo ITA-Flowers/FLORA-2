@@ -32,12 +32,14 @@ bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, dou
     double latRad = lat * M_PI / 180.0;
 
     // Convert to degrees (approx.)
-    double deltaLat = (distance * cos(bearingRad)) / 111320.0;
-    double deltaLon = (distance * sin(bearingRad)) / (111320.0 * cos(latRad));
+    constexpr double R = 6371000.0; // Earth radius in meters
+
+    double deltaLat = (distance / R * cos(bearingRad)) / 111320.0;
+    double deltaLon = (distance / R * sin(bearingRad)) / (111320.0 * cos(latRad));
 
     // Apply updates
-    gpsData_.setLatitude(lat + deltaLat);
-    gpsData_.setLongitude(lon + deltaLon);
+    gpsData_.setLatitude(lat + deltaLat * 180.0 / M_PI);
+    gpsData_.setLongitude(lon + deltaLon * 180.0 / M_PI);
 
     // Update internal state
     lastAltitude_ = altitude;

@@ -8,7 +8,6 @@ GPSData DeadReckoningProcessor::getGPSData() const {
 
 bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, double heading, double speed, double dt) {
     if (!hasPrevData_) {
-        // Initialize with the first valid GPS data
         if (initialGpsData.getLatitude() < 1.0 || initialGpsData.getLongitude() < 1.0) {
             std::cerr << "Error: Initial GPS fix is invalid." << std::endl;
             return false;
@@ -18,30 +17,33 @@ bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, dou
         lastHeading_ = heading;
         lastSpeed_ = speed;
         hasPrevData_ = true;
-
-    } else {
-        if (altitude <= 0.0) return false;
-
-        // Update GPS data based on dead reckoning
-        double lat = gpsData_.getLatitude();
-        double lon = gpsData_.getLongitude();
-
-        // Simple dead reckoning update (this can be improved with more complex models)
-        double distance = speed * dt; // Distance traveled in this time step
-        double bearingRad = heading * M_PI / 180.0; // Convert to radians
-
-        // Update latitude and longitude (this is a simplified model)
-        lat += (distance * cos(bearingRad)) / 111320.0; // Approximate conversion from meters to degrees
-        lon += (distance * sin(bearingRad)) / (111320.0 * cos(lat * M_PI / 180.0)); // Adjust for latitude
-
-        gpsData_.setLatitude(lat);
-        gpsData_.setLongitude(lon);
-
-        // Update altitude and speed
-        lastAltitude_ = altitude;
-        lastHeading_ = heading;
-        lastSpeed_ = speed;
+        return true;
     }
+
+    if (altitude <= 0.0) return false;
+
+    // Get previous coordinates
+    double lat = gpsData_.getLatitude();
+    double lon = gpsData_.getLongitude();
+
+    // Compute distance and heading
+    double distance = speed * dt; // [m]
+    double bearingRad = heading * M_PI / 180.0; // [rad]
+    double latRad = lat * M_PI / 180.0;
+
+    // Convert to degrees (approx.)
+    double deltaLat = (distance * cos(bearingRad)) / 111320.0;
+    double deltaLon = (distance * sin(bearingRad)) / (111320.0 * cos(latRad));
+
+    // Apply updates
+    gpsData_.setLatitude(lat + deltaLat);
+    gpsData_.setLongitude(lon + deltaLon);
+
+    // Update internal state
+    lastAltitude_ = altitude;
+    lastHeading_ = heading;
+    lastSpeed_ = speed;
 
     return true;
 }
+

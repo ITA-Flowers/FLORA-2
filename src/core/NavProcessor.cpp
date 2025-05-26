@@ -114,11 +114,13 @@ int NavProcessor::process(void) {
 
     // Write header to output file
     std::cout << "    - writing header to output file." << std::endl;
+    std::cout << std::fixed << std::setprecision(8);
+    outFile << std::fixed << std::setprecision(8);
     outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon\n";
     std::cout << "      * header written successfully." << std::endl;
 
     // Process video frames and log data
-    std::cout << "    - processing:\n" << std::endl;
+    std::cout << "    - processing:\n\n\n\n\n\n\n" << std::endl;
     cv::Mat frame;
     int frameCount = 0;
 

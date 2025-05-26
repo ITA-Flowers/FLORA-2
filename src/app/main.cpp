@@ -1,5 +1,5 @@
 #include "Config.hpp"
-#include "../core/Vector3D.hpp"
+#include "../core/types/Vector3D.hpp"
 #include "../nav-of/core/OpticalFlowProcessor.hpp"
 #include "../nav-dr/core/DeadReckoningProcessor.hpp"
 #include <opencv2/opencv.hpp>

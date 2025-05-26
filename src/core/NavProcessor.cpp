@@ -1,7 +1,12 @@
 #include "NavProcessor.hpp"
 
 int NavProcessor::initInput(const std::filesystem::path& inputDir) {
-    fileBasename_ = inputDir.filename().string();
+    std::filesystem::path cleaned = inputDir;
+    if (cleaned.has_filename() && cleaned.filename().empty()) {
+        cleaned = cleaned.parent_path();  // usuń trailing slash
+    }
+    fileBasename_ = cleaned.filename().string();
+
     if (fileBasename_.empty()) {
         std::cerr << "Error: Input directory name is empty." << std::endl;
         return -1;

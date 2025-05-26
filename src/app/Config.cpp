@@ -6,19 +6,22 @@
 void Config::printHelp(const char* programName) {
     std::cout << "Usage: " << programName << " [options]\n"
               << "Options:\n"
+              << " REQUIRED:\n"
               << "  -f, --file FILE       input log file\n"
               << "  -c, --video FILE      input video file\n"
               << "  -o, --output FILE     store output into file\n\n"
               
-              << "  -F, --fps FPS         video frames per second (default: 30)\n"
-              << "  -V, --fov FOV         camera field of view in degrees (default: 91)\n"
-              << "  -W, --width WIDTH     video width in pixels (default: 1920)\n"
-              << "  -H, --height HEIGHT   video height in pixels (default: 1080)\n"
-              << "  -A, --alt ALTITUDE    altitude in meters (default: 100)\n\n"
+              << " OPTIONAL:\n"
+              << "  Optical Flow parameters:\n"
+              << "   -F, --fps FPS         video frames per second (default: 30)\n"
+              << "   -V, --fov FOV         camera field of view in degrees (default: 91)\n"
+              << "   -W, --width WIDTH     video width in pixels (default: 1920)\n"
+              << "   -H, --height HEIGHT   video height in pixels (default: 1080)\n\n"
 
-              << "  -O, --only-of         only process optical flow\n"
-              << "  -D, --only-dr         only process dead reckoning\n\n"
+              << "  Dead Reckoning parameters:\n"
+              << "   ... (not implemented yet)\n\n"
 
+              << " OTHER:\n"
               << "  -v, --version         show version\n"
               << "  -h, --help            show this information\n";
 }
@@ -42,8 +45,6 @@ void Config::printSummary(const Config config) {
     std::cout << "  Height[px]:           " << config.videoHeightPx << std::endl;
     std::cout << "  Altitude[m]:          " << config.altitudeM << std::endl;
 
-    std::cout << " Flags:" << std::endl;
-    std::cout << "  Mode:                 " << (config.onlyOF ? "Optical Flow" : (config.onlyDR ? "Dead Reckoning" : "Both")) << std::endl;
 }
 
 Config Config::parseCommandLine(int argc, char* argv[]) {
@@ -122,10 +123,6 @@ Config Config::parseCommandLine(int argc, char* argv[]) {
                 config.showHelp = true;
                 return config;
             }
-        } else if (arg == "-O" || arg == "--only-of") {
-            config.onlyOF = true;
-        } else if (arg == "-D" || arg == "--only-dr") {
-            config.onlyDR = true;
         } else {
             std::cerr << "Unknown option: " << arg << "\n";
             config.showHelp = true;

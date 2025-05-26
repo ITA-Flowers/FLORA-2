@@ -1,6 +1,6 @@
 #pragma once
 #include <opencv2/opencv.hpp>
-#include "../../core/Vector3D.hpp"
+#include "../../core/types/Vector3D.hpp"
 
 class IOFProcessor {
 public:

@@ -14,9 +14,10 @@ target_include_directories(flora_app
 
 # -- Flore Core
 add_library(flora_core
-    core/Vector3D.cpp
-    core/Quaternion.cpp
-    core/Matrix.cpp
+    core/types/Vector3D.cpp
+    core/types/Quaternion.cpp
+    core/types/Matrix.cpp
+    core/NavProcessor.cpp
 )
 
 target_include_directories(flora_core
@@ -39,6 +40,7 @@ add_library(flora_nav-dr
     nav-dr/sensors/GPSData.cpp
     nav-dr/sensors/IMUData.cpp
     nav-dr/sensors/SensorData.cpp
+    nav-dr/core/DeadReckoningProcessor.cpp
 )
 
 target_include_directories(flora_nav-dr
@@ -84,8 +86,7 @@ target_link_libraries(flora2
     PRIVATE
         flora_app
         flora_core
+        flora_nav-dr
         flora_nav-of
         ${OpenCV_LIBS}
-        # flora_nav-dr
-        # flora_nav-sf
 )

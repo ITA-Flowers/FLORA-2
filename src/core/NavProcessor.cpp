@@ -141,7 +141,7 @@ int NavProcessor::process(void) {
         double timestamp = std::stod(values[columnIndex["timestamp"]]);
         double vx = std::stod(values[columnIndex["vx"]]);
         double vy = std::stod(values[columnIndex["vy"]]);
-        double alt = std::stod(values[columnIndex["z"]]);
+        double alt = -std::stod(values[columnIndex["z"]]);
 
         double heading_rad = std::atan2(vx, vy);
         double heading_deg = heading_rad * 180.0 / M_PI;
@@ -179,15 +179,21 @@ int NavProcessor::process(void) {
                 << ref_lat << ","
                 << ref_lon << "\n";
 
-        std::cout << "        - frame: " << frameCount
-                  << "\tspeed: " << speed_mps
-                  << "\taltitude: " << alt
-                  << "\theading: " << heading_deg
-                  << "\tdr_lat: " << gpsData.getLatitude()
-                  << "\tdr_lon: " << gpsData.getLongitude()
-                  << "\tgps_lat: " << ref_lat
-                  << "\tgps_lon: " << ref_lon
-                  << "\r" << std::flush;
+        if (frameCount != 1) {
+            std::cout << "\033[8A";
+            for (int i = 0; i < 8; ++i) std::cout << "\033[2K\033[1B";
+            std::cout << "\033[8A";
+        }
+        
+        std::cout << "frame:    " << frameCount << "\n"
+                << "speed:    " << speed_mps << " m/s\n"
+                << "altitude: " << alt << " m\n"
+                << "heading:  " << heading_deg << " deg\n"
+                << "dr_lat:   " << gpsData.getLatitude() << "\n"
+                << "dr_lon:   " << gpsData.getLongitude() << "\n"
+                << "gps_lat:  " << ref_lat << "\n"
+                << "gps_lon:  " << ref_lon << "\n"
+                << std::flush;
     }
 
     outFile.close();

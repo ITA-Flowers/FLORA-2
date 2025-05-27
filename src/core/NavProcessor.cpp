@@ -209,13 +209,13 @@ int NavProcessor::process(void) {
         if (i % logFactor == 0 || i == 0) {
             if (!std::getline(inFile, line)) break;
             logCount++;
-            debugLine = "+|";
+            debugLine = "        +|";
         } else {
-            debugLine = " |";
+            debugLine = "         |";
         }
 
         if (i % gpsFactor == 0 || i == 0) {
-            if (!std::getline(gpsFile, line)) break;
+            if (!std::getline(gpsFile, gpsLine)) break;
             gpsCount++;
             debugLine += "+|";
         } else {

@@ -183,10 +183,15 @@ int NavProcessor::process(void) {
     int logFactor   = std::round(static_cast<double>(logLines) / static_cast<double>(minSamples));
     int gpsFactor   = std::round(static_cast<double>(gpsLines) / static_cast<double>(minSamples));
     int videoFactor = std::round(static_cast<double>(totalFrames) / static_cast<double>(minSamples));
-    std::cout << "      * log factor: " << logFactor << "\n"
+    std::cout << "      * total samples: " << minSamples << "\n"
+              << "      * log lines: " << logLines << "\n"
+              << "      * gps lines: " << gpsLines << "\n"
+              << "      * total frames: " << totalFrames << "\n"
+              << "      * min samples: " << minSamples << "\n"
+              << "      * max samples: " << maxSamples << "\n"
+              << "      * log factor: " << logFactor << "\n"
               << "      * gps factor: " << gpsFactor << "\n"
-              << "      * video factor: " << videoFactor << "\n"
-              << std::endl;
+              << "      * video factor: " << videoFactor << std::endl;
 
     int frameCount = 0;
     int logCount = 0;
@@ -195,7 +200,7 @@ int NavProcessor::process(void) {
     std::string line;
     std::string gpsLine;
 
-    std::cout << "\n    - processing frames and log data:\n";
+    std::cout << "    - processing frames and log data:\n";
     std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
     for (int i = 0; i < maxSamples; ++i) {
         if (i % logFactor == 0 || i == 0) {

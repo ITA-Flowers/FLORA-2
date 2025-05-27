@@ -69,8 +69,8 @@ int NavProcessor::process(void) {
 
     // Open input files
     std::cout << "    - opening input files:\n";
-    std::cout << "      * input log file: " << inputLogFile_ << " | lines: " << std::endl;
     int logLines = int(countLinesInFile(inputLogFile_.string()));
+    std::cout << "      * input log file: " << inputLogFile_ << " | lines: " << logLines << std::endl;
     if (logLines < 0) {
         std::cerr << "Error: Could not count lines in input log file." << std::endl;
         return -1;
@@ -186,11 +186,11 @@ int NavProcessor::process(void) {
      * 
     */
 
-    int maxSamples = std::max({logLines, gpsLines, totalFrames});
+    int minSamples = std::min({logLines, gpsLines, totalFrames});
 
-    int logFactor = std::round(static_cast<double>(logLines) / maxSamples);
-    int gpsFactor = std::round(static_cast<double>(gpsLines) / maxSamples);
-    int videoFactor = std::round(static_cast<double>(totalFrames) / maxSamples);
+    int logFactor   = std::round(static_cast<double>(logLines) / static_cast<double>(minSamples));
+    int gpsFactor   = std::round(static_cast<double>(gpsLines) / static_cast<double>(minSamples));
+    int videoFactor = std::round(static_cast<double>(totalFrames) / static_cast<double>(minSamples));
     std::cout << "      * log factor: " << logFactor << "\n"
               << "      * gps factor: " << gpsFactor << "\n"
               << "      * video factor: " << videoFactor << "\n"

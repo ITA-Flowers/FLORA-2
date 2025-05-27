@@ -209,7 +209,7 @@ int NavProcessor::process(void) {
     std::string gpsLine;
 
     std::cout << "    - processing frames and log data:\n";
-    std::cout << "\n\n\n\n\n\n\n\n\n\n\n" << std::endl;
+    std::cout << "\n\n\n\n\n\n\n\n\n" << std::endl;
     for (int i = 0; i < maxSamples; ++i) {
         if (logCounter == 0) {
             if (!std::getline(inFile, line)) break;
@@ -300,9 +300,9 @@ int NavProcessor::process(void) {
                 << ref_vel_m_s << "\n";
 
         if (frameCount != 1) {
-            std::cout << "\033[12A";
-            for (int j = 0; j < 12; ++j) std::cout << "\033[2K\033[1B";
-            std::cout << "\033[12A";
+            std::cout << "\033[11A";
+            for (int j = 0; j < 11; ++j) std::cout << "\033[2K\033[1B";
+            std::cout << "\033[11A";
         }
         
         std::cout << "      frame:           " << frameCount << " / " << totalFrames << "\n"

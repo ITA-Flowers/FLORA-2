@@ -180,19 +180,6 @@ int NavProcessor::process(void) {
     int minSamples = std::min({logLines, gpsLines, totalFrames});
     int maxSamples = std::max({logLines, gpsLines, totalFrames});
 
-    int logFactor   = std::round(static_cast<double>(logLines) / static_cast<double>(minSamples));
-    int gpsFactor   = std::round(static_cast<double>(gpsLines) / static_cast<double>(minSamples));
-    int videoFactor = std::round(static_cast<double>(totalFrames) / static_cast<double>(minSamples));
-    std::cout << "      * total samples: " << minSamples << "\n"
-              << "      * log lines: " << logLines << "\n"
-              << "      * gps lines: " << gpsLines << "\n"
-              << "      * total frames: " << totalFrames << "\n"
-              << "      * min samples: " << minSamples << "\n"
-              << "      * max samples: " << maxSamples << "\n"
-              << "      * log factor: " << logFactor << "\n"
-              << "      * gps factor: " << gpsFactor << "\n"
-              << "      * video factor: " << videoFactor << std::endl;
-
     int frameCount = 0;
     int logCount = 0;
     int gpsCount = 0;
@@ -204,6 +191,16 @@ int NavProcessor::process(void) {
     int logEvery = maxSamples / logLines;
     int gpsEvery = maxSamples / gpsLines;
     int videoEvery = maxSamples / totalFrames;
+
+    std::cout << "      * total samples: " << minSamples << "\n"
+            << "      * log lines:     " << logLines << "\n"
+            << "      * gps lines:     " << gpsLines << "\n"
+            << "      * total frames:  " << totalFrames << "\n"
+            << "      * min samples:   " << minSamples << "\n"
+            << "      * max samples:   " << maxSamples << "\n"
+            << "      * log   every:   " << logEvery << " iteration\n"
+            << "      * gps   every:   " << gpsEvery << " iteration\n"
+            << "      * frame every:   " << videoEvery << " iteration" << std::endl;
 
     std::string line;
     std::string gpsLine;

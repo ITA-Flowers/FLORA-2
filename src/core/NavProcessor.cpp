@@ -174,7 +174,7 @@ int NavProcessor::process(void) {
     std::cout << "      * header written successfully." << std::endl;
 
     // Process video frames and log data
-    std::cout << "    - processing:" << std::endl;
+    std::cout << "    - preprocessing:" << std::endl;
     cv::Mat frame;
 
     int minSamples = std::min({logLines, gpsLines, totalFrames});
@@ -195,7 +195,8 @@ int NavProcessor::process(void) {
     std::string line;
     std::string gpsLine;
 
-    std::cout << "\n\n\n\n\n\n\n\n" << std::endl;
+    std::cout << "\n    - processing frames and log data:\n";
+    std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
     for (int i = 0; i < maxSamples; ++i) {
         if (i % logFactor == 0 || i == 0) {
             if (!std::getline(inFile, line)) break;
@@ -284,7 +285,7 @@ int NavProcessor::process(void) {
 
         if (frameCount != 1) {
             std::cout << "\033[11A";
-            for (int i = 0; i < 11; ++i) std::cout << "\033[2K\033[1B";
+            for (int j = 0; j < 11; ++j) std::cout << "\033[2K\033[1B";
             std::cout << "\033[11A";
         }
         

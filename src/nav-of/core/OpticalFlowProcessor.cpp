@@ -36,22 +36,15 @@ bool OpticalFlowProcessor::update(const cv::Mat& frame, double altitude) {
         return false;
     }
 
-    // Zakładamy skalowanie do 360 px wysokości
-    const int scaledHeight = 360;
-    const float resizeRatio = static_cast<float>(scaledHeight) / static_cast<float>(imageHeight_);
-    const float virtualFocalLength = focalLengthMm_ * resizeRatio;
+    // Zakładamy, że kamera ma poziomy FOV, a przeskalowujemy do 640x360
+    int scaledWidth = 640;
+    int scaledHeight = 360;
+    int scaledDiagonal = static_cast<int>(std::sqrt(scaledWidth * scaledWidth + scaledHeight * scaledHeight));
+    float metricScale = calculateMetricScale(altitude, focalLengthMm_, scaledDiagonal);
 
-    // Przeliczamy FOV dla przeskalowanego obrazu
-    float adjustedFovDeg = 2.0f * std::atan((scaledHeight * 0.5f) / virtualFocalLength) * (180.0f / static_cast<float>(M_PI));
-    int scaledWidth = static_cast<int>(frame.cols * resizeRatio);
-    int diagonal = static_cast<int>(std::sqrt(scaledWidth * scaledWidth + scaledHeight * scaledHeight));
-    float metricScale = calculateMetricScale(altitude, adjustedFovDeg, diagonal);
-
-    // Wywołujemy funkcję z dodatkowym argumentem
     float avgMag = computeFarnebackGpuMagnitude(prevGray_, gray, scaledHeight);
 
-    constexpr float calibrationFactor = 0.2f;
-    float rawSpeed = avgMag * metricScale * fps_ * calibrationFactor;
+    float rawSpeed = avgMag * metricScale * fps_;
     float filteredSpeed = kalman_.update(rawSpeed);
 
     currentVelocity_ = Vector3D(filteredSpeed, 0.0, 0.0);

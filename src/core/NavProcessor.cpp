@@ -68,18 +68,23 @@ int NavProcessor::process(void) {
     std::cout << "OK" << std::endl;
 
     // Open input files
-    std::cout << "    - opening input files:\n        - " << inputLogFile_ << ",\n        - " << inputVideoFile_ << ",\n        - " << inputGPSFile_ << std::endl;
+    std::cout << "    - opening input files:\n";
+    std::cout << "      * input log file: " << inputLogFile_ << " | lines: " << std::endl;
+    int logLines = countLinesInFile(inputLogFile_);
+    if (logLines < 0) {
+        std::cerr << "Error: Could not count lines in input log file." << std::endl;
+        return -1;
+    }
+
+    int gpsLines = countLinesInFile(inputGPSFile_);
+    if (gpsLines < 0) {
+        std::cerr << "Error: Could not count lines in input GPS file." << std::endl;
+        return -1;
+    }
+
     std::ifstream inFile(inputLogFile_);
     std::ifstream gpsFile(inputGPSFile_);
-    if (!inFile.is_open()) {
-        std::cerr << "Error: Could not open input log file: " << inputLogFile_ << std::endl;
-        return -1;
-    }
-    if (!gpsFile.is_open()) {
-        std::cerr << "Error: Could not open input GPS file: " << inputGPSFile_ << std::endl;
-        inFile.close();
-        return -1;
-    }
+
     std::cout << "      * input files opened successfully." << std::endl;
 
     // Read the header line from the log file
@@ -142,6 +147,13 @@ int NavProcessor::process(void) {
         inFile.close();
         return -1;
     }
+
+    int fps = static_cast<int>(cap.get(cv::CAP_PROP_FPS));
+    int totalFrames = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_COUNT));
+    opticalFlowProcessor_.setFrameRate(static_cast<int>(cap.get(cv::CAP_PROP_FPS)));
+
+    std::cout << "        - frame rate: " << opticalFlowProcessor_.getFrameRate() << " fps" << std::endl;
+    std::cout << "        - total frames: " << totalFrames << std::endl;
     std::cout << "      * video file opened successfully." << std::endl;
 
     // Open output file
@@ -161,11 +173,39 @@ int NavProcessor::process(void) {
     std::cout << "      * header written successfully." << std::endl;
 
     // Process video frames and log data
-    std::cout << "    - processing:\n\n\n\n\n\n\n\n" << std::endl;
+    std::cout << "    - processing:\n" << std::endl;
     cv::Mat frame;
     int frameCount = 0;
 
-    while (cap.read(frame) && !inFile.eof()) {
+    /*
+     * logLines: number of lines in the log file
+     * gpsLines: number of lines in the GPS file
+     * totalFrames: number of frames in the video file
+     * 
+     * 
+    */
+
+    int maxSamples = std::max(logLines, gpsLines, totalFrames);
+
+    int logFactor = std::round(static_cast<double>(logLines) / maxSamples);
+    int gpsFactor = std::round(static_cast<double>(gpsLines) / maxSamples);
+    int videoFactor = std::round(static_cast<double>(totalFrames) / maxSamples);
+    std::cout << "      * log factor: " << logFactor << "\n"
+              << "      * gps factor: " << gpsFactor << "\n"
+              << "      * video factor: " << videoFactor << "\n"
+              << std::endl;
+
+    int logFactorCounter = 0;
+    int gpsFactorCounter = 0;
+    int videoFactorCounter = 0;
+
+    std::string line;
+
+    std::cout << "\n\n\n\n\n\n\n\n" << std::endl;
+    while (cap.read(frame) && !inFile.eof() && !gpsFile.eof()) {
+
+        // -----------------------------------------------------------------------------------------------------
+        // * Log file processing
         std::string line;
         if (!std::getline(inFile, line)) break;
 
@@ -188,6 +228,8 @@ int NavProcessor::process(void) {
             heading_deg += 360.0; // Normalize to [0, 360)
         }
 
+        // -----------------------------------------------------------------------------------------------------
+        // * GPS file processing
         std::string gpsLine;
         if (!std::getline(gpsFile, gpsLine)) break;
 
@@ -203,6 +245,8 @@ int NavProcessor::process(void) {
         double ref_lon = std::stoi(gpsValues[gpsColumnIndex["lon"]]) / 1e7;
         double ref_vel_m_s = std::stod(gpsValues[gpsColumnIndex["vel_m_s"]]);
 
+        // -----------------------------------------------------------------------------------------------------
+        // * Frame processing
         frameCount++;
         if (!opticalFlowProcessor_.update(frame, alt)) {
             std::cerr << "Error: Optical flow update failed for frame " << frameCount << "." << std::endl;
@@ -212,6 +256,7 @@ int NavProcessor::process(void) {
         Vector3D velocity = opticalFlowProcessor_.getVelocity();
         double speed_mps = velocity.getX();
 
+        // * Update dead reckoning processor
         if (!deadReckoningProcessor_.update(
                 GPSData(ref_lat, ref_lon, alt),
                 alt,
@@ -222,7 +267,9 @@ int NavProcessor::process(void) {
             continue;
         }
 
-        // Hint: headers: frame_number | speed_mps | altitude | heading | dr_lat | dr_lon | gps_lat | gps_lon
+        // -----------------------------------------------------------------------------------------------------
+        // * Get dead reckoning GPS data and write to output file
+        // ? Hint: headers: frame_number | speed_mps | altitude | heading | dr_lat | dr_lon | gps_lat | gps_lon
         GPSData gpsData = deadReckoningProcessor_.getGPSData();
         outFile << frameCount << ","
                 << speed_mps << ","
@@ -240,7 +287,7 @@ int NavProcessor::process(void) {
             std::cout << "\033[9A";
         }
         
-        std::cout << "      frame:    " << frameCount << "\n"
+        std::cout << "      frame:    " << frameCount << " / " << totalFrames << "\n"
                 << "      speed:    " << speed_mps << " m/s\n"
                 << "      altitude: " << alt << " m\n"
                 << "      heading:  " << heading_deg << " deg\n"

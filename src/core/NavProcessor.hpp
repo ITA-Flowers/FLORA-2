@@ -31,6 +31,17 @@ public:
     int process(void);
 
 private:
+    int countLinesInFile(const std::filesystem::path& filePath) {
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            std::cerr << "Error: Could not open file: " << filePath << std::endl;
+            return -1;
+        }
+        int lines = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
+        file.close();
+        return lines;
+    }
+
     OpticalFlowProcessor opticalFlowProcessor_;
     DeadReckoningProcessor deadReckoningProcessor_;
 

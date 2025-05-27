@@ -185,7 +185,7 @@ int NavProcessor::process(void) {
      * 
     */
 
-    int maxSamples = std::max(logLines, gpsLines, totalFrames);
+    int maxSamples = std::max({logLines, gpsLines, totalFrames});
 
     int logFactor = std::round(static_cast<double>(logLines) / maxSamples);
     int gpsFactor = std::round(static_cast<double>(gpsLines) / maxSamples);

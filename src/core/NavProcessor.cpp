@@ -234,9 +234,9 @@ int NavProcessor::process(void) {
                 << ref_lon << "\n";
 
         if (frameCount != 1) {
-            std::cout << "\033[8A";
+            std::cout << "\033[9A";
             for (int i = 0; i < 9; ++i) std::cout << "\033[2K\033[1B";
-            std::cout << "\033[8A";
+            std::cout << "\033[9A";
         }
         
         std::cout << "      frame:    " << frameCount << "\n"

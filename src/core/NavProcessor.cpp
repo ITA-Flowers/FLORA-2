@@ -18,7 +18,7 @@ int NavProcessor::initInput(const std::filesystem::path& inputDir) {
     std::filesystem::path logFilename = fileBasename_ + "_vehicle_local_position_0.csv";
     inputLogFile_ = logSubdir / logFilename;
 
-    std::filesystem::path gpsLogFilename = fileBasename_ + "_vehicle_global_position_0.csv";
+    std::filesystem::path gpsLogFilename = fileBasename_ + "_vehicle_gps_position_0.csv";
     inputGPSFile_ = logSubdir / gpsLogFilename;
 
     inputVideoFile_ = inputDir / ("video_" + fileBasename_.substr(4) + ".mp4");
@@ -127,7 +127,7 @@ int NavProcessor::process(void) {
         gpsColumnIndex[gpsColumn] = idxg++;
     }
     
-    if (gpsColumnIndex.count("lat") == 0 || gpsColumnIndex.count("lon") == 0) {
+    if (gpsColumnIndex.count("lat") == 0 || gpsColumnIndex.count("lon") == 0 || gpsColumnIndex.count("vel_m_s") == 0) {
         std::cerr << "Error: Required columns not found in GPS CSV header." << std::endl;
         return -1;
     }
@@ -157,11 +157,11 @@ int NavProcessor::process(void) {
     std::cout << "    - writing header to output file." << std::endl;
     std::cout << std::fixed << std::setprecision(10);
     outFile << std::fixed << std::setprecision(10);
-    outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon\n";
+    outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon,gps_vel\n";
     std::cout << "      * header written successfully." << std::endl;
 
     // Process video frames and log data
-    std::cout << "    - processing:\n\n\n\n\n\n\n" << std::endl;
+    std::cout << "    - processing:\n\n\n\n\n\n\n\n" << std::endl;
     cv::Mat frame;
     int frameCount = 0;
 
@@ -199,8 +199,9 @@ int NavProcessor::process(void) {
             gpsValues.push_back(gpsCell);
         }
 
-        double ref_lat = std::stod(gpsValues[gpsColumnIndex["lat"]]);
-        double ref_lon = std::stod(gpsValues[gpsColumnIndex["lon"]]);
+        double ref_lat = std::stoi(gpsValues[gpsColumnIndex["lat"]]) / 1e7;
+        double ref_lon = std::stoi(gpsValues[gpsColumnIndex["lon"]]) / 1e7;
+        double ref_vel_m_s = std::stod(gpsValues[gpsColumnIndex["vel_m_s"]]);
 
         frameCount++;
         if (!opticalFlowProcessor_.update(frame, alt)) {
@@ -230,12 +231,13 @@ int NavProcessor::process(void) {
                 << gpsData.getLatitude() << ","
                 << gpsData.getLongitude() << ","
                 << ref_lat << ","
-                << ref_lon << "\n";
+                << ref_lon << ","
+                << ref_vel_m_s << "\n";
 
         if (frameCount != 1) {
-            std::cout << "\033[8A";
-            for (int i = 0; i < 8; ++i) std::cout << "\033[2K\033[1B";
-            std::cout << "\033[8A";
+            std::cout << "\033[9A";
+            for (int i = 0; i < 9; ++i) std::cout << "\033[2K\033[1B";
+            std::cout << "\033[9A";
         }
         
         std::cout << "      frame:    " << frameCount << "\n"
@@ -246,6 +248,7 @@ int NavProcessor::process(void) {
                 << "      dr_lon:   " << gpsData.getLongitude() << "\n"
                 << "      gps_lat:  " << ref_lat << "\n"
                 << "      gps_lon:  " << ref_lon << "\n"
+                << "      gps_vel:  " << ref_vel_m_s << " m/s\n"
                 << std::flush;
     }
 

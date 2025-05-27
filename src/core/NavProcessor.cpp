@@ -191,7 +191,7 @@ int NavProcessor::process(void) {
     int videoCounter = 0;
 
     int logEvery = std::round(fps / freqLog);
-    int gpsEvery = std::round(fps / freqGPS)
+    int gpsEvery = std::round(fps / freqGPS);
     int videoEvery = 1;
 
     std::cout << "      * total samples: " << minSamples << "\n"

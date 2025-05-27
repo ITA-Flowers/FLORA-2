@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 #include <cmath>
+#include <numeric>
 
 #include "../nav-dr/core/DeadReckoningProcessor.hpp"
 #include "../nav-of/core/OpticalFlowProcessor.hpp"

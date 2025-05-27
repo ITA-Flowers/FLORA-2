@@ -200,23 +200,36 @@ int NavProcessor::process(void) {
     std::string line;
     std::string gpsLine;
 
+    std::string debugLine;
+
     std::cout << "    - processing frames and log data:\n";
-    std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
+    std::cout << "      * L|G|V" << std::endl;
+    std::cout << "\n\n\n\n\n\n\n\n\n\n\n" << std::endl;
     for (int i = 0; i < maxSamples; ++i) {
         if (i % logFactor == 0 || i == 0) {
             if (!std::getline(inFile, line)) break;
             logCount++;
+            debugLine = "+|";
+        } else {
+            debugLine = " |";
         }
 
         if (i % gpsFactor == 0 || i == 0) {
             if (!std::getline(gpsFile, line)) break;
             gpsCount++;
+            debugLine += "+|";
+        } else {
+            debugLine += " |";
         }
 
         if (i % videoFactor == 0 || i == 0) {
             if (!cap.read(frame)) break;
             frameCount++;
+            debugLine += "+";
+        } else {
+            debugLine += " ";
         }
+        std::cout << debugLine << std::endl;
 
         // -----------------------------------------------------------------------------------------------------
         // * Log file processing
@@ -289,9 +302,9 @@ int NavProcessor::process(void) {
                 << ref_vel_m_s << "\n";
 
         if (frameCount != 1) {
-            std::cout << "\033[11A";
-            for (int j = 0; j < 11; ++j) std::cout << "\033[2K\033[1B";
-            std::cout << "\033[11A";
+            std::cout << "\033[12A";
+            for (int j = 0; j < 12; ++j) std::cout << "\033[2K\033[1B";
+            std::cout << "\033[12A";
         }
         
         std::cout << "      frame:           " << frameCount << " / " << totalFrames << "\n"

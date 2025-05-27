@@ -70,13 +70,13 @@ int NavProcessor::process(void) {
     // Open input files
     std::cout << "    - opening input files:\n";
     std::cout << "      * input log file: " << inputLogFile_ << " | lines: " << std::endl;
-    int logLines = static_cast<int>(countLinesInFile(inputLogFile_.string()));
+    int logLines = int(countLinesInFile(inputLogFile_.string()));
     if (logLines < 0) {
         std::cerr << "Error: Could not count lines in input log file." << std::endl;
         return -1;
     }
 
-    int gpsLines = static_cat<int>(countLinesInFile(inputGPSFile_.string()));
+    int gpsLines = int(countLinesInFile(inputGPSFile_.string()));
     std::cout << "      * input GPS file: " << inputGPSFile_ << " | lines: " << gpsLines << std::endl;
     if (gpsLines < 0) {
         std::cerr << "Error: Could not count lines in input GPS file." << std::endl;

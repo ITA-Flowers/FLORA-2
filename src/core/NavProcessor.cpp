@@ -197,39 +197,37 @@ int NavProcessor::process(void) {
     int logCount = 0;
     int gpsCount = 0;
 
+    int logCounter = 0;
+    int gpsCounter = 0;
+    int videoCounter = 0;
+
+    int logEvery = maxSamples / logLines;
+    int gpsEvery = maxSamples / gpsLines;
+    int videoEvery = maxSamples / totalFrames;
+
     std::string line;
     std::string gpsLine;
 
-    std::string debugLine;
-
     std::cout << "    - processing frames and log data:\n";
-    std::cout << "      * L|G|V" << std::endl;
     std::cout << "\n\n\n\n\n\n\n\n\n\n\n" << std::endl;
     for (int i = 0; i < maxSamples; ++i) {
-        if (i % logFactor == 0 || i == 0) {
+        if (logCounter == 0) {
             if (!std::getline(inFile, line)) break;
             logCount++;
-            debugLine = "        +|";
-        } else {
-            debugLine = "         |";
         }
+        logCounter = (logCounter + 1) % logEvery;
 
-        if (i % gpsFactor == 0 || i == 0) {
+        if (gpsCounter == 0) {
             if (!std::getline(gpsFile, gpsLine)) break;
             gpsCount++;
-            debugLine += "+|";
-        } else {
-            debugLine += " |";
         }
+        gpsCounter = (gpsCounter + 1) % gpsEvery;
 
-        if (i % videoFactor == 0 || i == 0) {
+        if (videoCounter == 0) {
             if (!cap.read(frame)) break;
             frameCount++;
-            debugLine += "+";
-        } else {
-            debugLine += " ";
         }
-        std::cout << debugLine << std::endl;
+        videoCounter = (videoCounter + 1) % videoEvery;
 
         // -----------------------------------------------------------------------------------------------------
         // * Log file processing

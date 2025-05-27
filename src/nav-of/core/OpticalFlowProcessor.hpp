@@ -14,6 +14,8 @@ public:
     void setCameraParams(double focalLength, const std::pair<int, int>& resolution) override;
     void setFrameRate(float fps) override;
 
+    float getFrameRate() const override;
+
     double getConfidenceScore() const override;
 
 private:

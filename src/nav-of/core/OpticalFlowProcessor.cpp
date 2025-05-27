@@ -20,6 +20,10 @@ void OpticalFlowProcessor::setFrameRate(float fps) {
     fps_ = fps;
 }
 
+float OpticalFlowProcessor::getFrameRate() const {
+    return fps_;
+}
+
 bool OpticalFlowProcessor::update(const cv::Mat& frame, double altitude) {
     if (frame.empty() || focalLengthMm_ == 0.0f || imageHeight_ == 0 || fps_ <= 0.0f) return false;
 

@@ -1,75 +1,35 @@
-#include "Config.hpp"
-#include "../core/Vector3D.hpp"
-#include "../nav-of/core/OpticalFlowProcessor.hpp"
-#include <opencv2/opencv.hpp>
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
 #include <filesystem>
+#include "Config.hpp"
+#include "../core/NavProcessor.hpp"
 
-int ofProcess(Config config, OpticalFlowProcessor& ofProcessor) {
-    std::cout << "  [*] Processing Optical Flow..." << std::endl;
-    std::cout << "      - opening video file: " << config.getInputVideoFile() << std::endl;
-    cv::VideoCapture cap(config.getInputVideoFile());
-    if (!cap.isOpened()) {
-        std::cerr << "[Error]: Could not open video file: " << config.getInputVideoFile() << std::endl;
+
+int initNavProcessor(NavProcessor& navProcessor, const Config& config) {
+    // Set camera parameters
+    navProcessor.setCameraParams(config.getVideoFovCameraDeg(), {config.getVideoWidthPx(), config.getVideoHeightPx()});
+    navProcessor.setFrameRate(config.getVideoFps());
+
+    // Initialize input files
+    if (navProcessor.initInput(std::filesystem::path(config.getInputDir())) != 0) {
+        std::cerr << "Error: Could not initialize input files." << std::endl;
+        return 1;
+    }
+
+    // Initialize output files
+    if (navProcessor.initOutput(std::filesystem::path(config.getOutputDir())) != 0) {
+        std::cerr << "Error: Could not initialize output files." << std::endl;
         return 2;
     }
-
-    std::string outputPath = "../../data/" + config.getOutputFile();
-    std::cout << "      - opening output file: " << outputPath << std::endl;
-    std::ofstream outFile(outputPath);
-
-    if (!outFile.is_open()) {
-        std::cerr << "[Error]: Could not open output file: " << outputPath << std::endl;
-        return 3;
-    }
-    outFile << "frame_number,speed_mps\n";
-
-    cv::Mat frame;
-    int frameCount = 0;
-
-    std::cout << "      - processing video frames:" << std::endl;
-    while (cap.read(frame)) {
-        if (ofProcessor.update(frame, config.getAltitudeM())) {
-            Vector3D v = ofProcessor.getVelocity();
-            std::cout << "         - frame: " << frameCount << "\tspeed: " << v.getX() << " m/s\r" << std::flush;
-            outFile << frameCount << "," << v.getX() << "\n";
-        }
-        frameCount++;
-    }
-
-    std::cout << std::endl << "      - finished processing video frames." << std::endl;
-    outFile.close();
 
     return 0;
 }
 
-int mainProcess(Config config) {
-    std::cout << "\n Initializing:" << std::endl;
-
-    std::cout << "  [*] Initializing Dead Reckoning Processor : ";
-    std::cout << "Not implemented yet. - skip" << std::endl;
-
-    std::cout << "  [*] Initializing Optical Flow Processor : ";
-    OpticalFlowProcessor ofProcessor;
-    ofProcessor.setCameraParams(config.getVideoFovCameraDeg(), {config.getVideoWidthPx(), config.getVideoHeightPx()});
-    ofProcessor.setFrameRate(config.getVideoFps());
-    std::cout << "OK" << std::endl << std::endl;
-
-    if (config.isOnlyOF()) {
-        std::cout << "  - Processing only Optical Flow...\n" << std::endl;
-        return ofProcess(config, ofProcessor);
-
-    } else if (config.isOnlyDR()) {
-        std::cout << "  - Processing only Dead Reckoning...\n" << std::endl;
-        std::cerr << "  [!] Dead Reckoning is not implemented yet.\n" << std::endl;
-        return 1;
-    } else {
-        std::cout << "  - Processing both Optical Flow and Dead Reckoning...\n" << std::endl;
-        std::cerr << "  [!] Dead Reckoning is not implemented yet.\n" << std::endl;
-        return 1;
+int doProcessing(NavProcessor& navProcessor, const Config& config) {
+    if (navProcessor.process() != 0) {
+        std::cerr << "Error: Processing failed." << std::endl;
+        return 3;
     }
+    return 0; // Placeholder for processing logic
 }
 
 int main(int argc, char* argv[]) {
@@ -81,8 +41,34 @@ int main(int argc, char* argv[]) {
     } else if (config.isShowVersion()) {
         config.printVersion();
     } else {
+        // Print configuration summary
         config.printSummary(config);
-        ret = mainProcess(config);
+        
+        // ---------------------------------------------------------------------------------------------------
+        // Initialize Navigation Processor
+        std::cout << "\nInitializing:" << std::endl;
+        std::cout << "  [*] Initializing Navigation Processor: ";
+
+        // -- Create an instance of NavProcessor
+        NavProcessor navProcessor;
+
+        // -- Initialize NavProcessor with configuration
+        ret = initNavProcessor(navProcessor, config);
+        if (ret != 0) {
+            std::cerr << "Error: Could not initialize NavProcessor." << std::endl;
+            return ret;
+        }
+        std::cout << "OK" << std::endl;
+
+        // ---------------------------------------------------------------------------------------------------
+        // Process the navigation data
+        std::cout << "  [*] Processing..." << std::endl;
+        ret = doProcessing(navProcessor, config);
+        if (ret != 0) {
+            std::cerr << "Error: Processing failed with code " << ret << "." << std::endl;
+            return ret;
+        }
+        std::cout << "  [*] Processing completed successfully." << std::endl;
     }
 
     std::cerr << std::endl << "[DEBUG] Final return code: " << ret << std::endl;

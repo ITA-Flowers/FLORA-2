@@ -188,8 +188,8 @@ int NavProcessor::process(void) {
     int gpsCounter = 0;
     int videoCounter = 0;
 
-    int logEvery = maxSamples / logLines;
-    int gpsEvery = maxSamples / gpsLines;
+    int logEvery = maxSamples / logLines + 1;
+    int gpsEvery = maxSamples / gpsLines + 1;
     int videoEvery = maxSamples / totalFrames;
 
     std::cout << "      * total samples: " << minSamples << "\n"

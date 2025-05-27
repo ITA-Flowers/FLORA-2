@@ -231,7 +231,8 @@ int NavProcessor::process(void) {
                 << gpsData.getLatitude() << ","
                 << gpsData.getLongitude() << ","
                 << ref_lat << ","
-                << ref_lon << "\n";
+                << ref_lon << ","
+                << ref_vel_m_s << "\n";
 
         if (frameCount != 1) {
             std::cout << "\033[9A";

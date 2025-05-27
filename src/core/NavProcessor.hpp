@@ -43,6 +43,8 @@ private:
         return lines;
     }
 
+    double computeFrequencyFromTimestamps(const std::filesystem::path& csvFile, const std::string& columnName);
+
     OpticalFlowProcessor opticalFlowProcessor_;
     DeadReckoningProcessor deadReckoningProcessor_;
 

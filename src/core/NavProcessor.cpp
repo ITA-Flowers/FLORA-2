@@ -70,6 +70,7 @@ int NavProcessor::process(void) {
     // Open input files
     std::cout << "    - opening input files:\n";
     int logLines = int(countLinesInFile(inputLogFile_.string()));
+    double freqLog = computeFrequencyFromTimestamps(inputLogFile_, "timestamp");
     std::cout << "      * input log file: " << inputLogFile_ << " | lines: " << logLines << std::endl;
     if (logLines < 0) {
         std::cerr << "Error: Could not count lines in input log file." << std::endl;
@@ -77,6 +78,7 @@ int NavProcessor::process(void) {
     }
 
     int gpsLines = int(countLinesInFile(inputGPSFile_.string()));
+    double freqGPS = computeFrequencyFromTimestamps(inputGPSFile_, "timestamp");
     std::cout << "      * input GPS file: " << inputGPSFile_ << " | lines: " << gpsLines << std::endl;
     if (gpsLines < 0) {
         std::cerr << "Error: Could not count lines in input GPS file." << std::endl;
@@ -188,13 +190,13 @@ int NavProcessor::process(void) {
     int gpsCounter = 0;
     int videoCounter = 0;
 
-    int logEvery = maxSamples / logLines + 1;
-    int gpsEvery = maxSamples / gpsLines + 1;
-    int videoEvery = maxSamples / totalFrames;
+    int logEvery = std::round(fps / freqLog);
+    int gpsEvery = std::round(fps / freqGPS)
+    int videoEvery = 1;
 
     std::cout << "      * total samples: " << minSamples << "\n"
-            << "      * log lines:     " << logLines << "\n"
-            << "      * gps lines:     " << gpsLines << "\n"
+            << "      * log freq:     " << freqLog << " Hz\n"
+            << "      * gps freq:     " << freqGPS << " Hz\n"
             << "      * total frames:  " << totalFrames << "\n"
             << "      * min samples:   " << minSamples << "\n"
             << "      * max samples:   " << maxSamples << "\n"
@@ -321,4 +323,72 @@ int NavProcessor::process(void) {
     cap.release();
 
     return 0;
+}
+
+
+double NavProcessor::computeFrequencyFromTimestamps(const std::filesystem::path& csvFile, const std::string& columnName) {
+    std::ifstream file(csvFile);
+    if (!file.is_open()) {
+        throw std::runtime_error("Cannot open file: " + csvFile.string());
+    }
+
+    std::string header;
+    std::getline(file, header);
+
+    std::stringstream ss(header);
+    std::string col;
+    int idx = -1, i = 0;
+    while (std::getline(ss, col, ',')) {
+        if (col == columnName) {
+            idx = i;
+            break;
+        }
+        i++;
+    }
+
+    if (idx == -1) throw std::runtime_error("Column not found: " + columnName);
+
+    std::vector<long long> microseconds;
+    std::string line;
+    int lineLimit = 100;
+
+    while (std::getline(file, line) && microseconds.size() < lineLimit) {
+        std::stringstream ls(line);
+        std::string cell;
+        int colIndex = 0;
+        std::string tsStr;
+
+        while (std::getline(ls, cell, ',')) {
+            if (colIndex == idx) {
+                tsStr = cell;
+                break;
+            }
+            colIndex++;
+        }
+
+        std::tm tm = {};
+        int micro = 0;
+        std::istringstream tsStream(tsStr);
+        tsStream >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+        if (tsStr.find('.') != std::string::npos) {
+            std::string micros = tsStr.substr(tsStr.find('.') + 1);
+            micro = std::stoi(micros.substr(0, 6)); // max 6 digits
+        }
+
+        auto tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+        long long us = std::chrono::duration_cast<std::chrono::microseconds>(tp.time_since_epoch()).count();
+        us += micro;
+        microseconds.push_back(us);
+    }
+
+    if (microseconds.size() < 2) throw std::runtime_error("Not enough samples.");
+
+    std::vector<long long> diffs;
+    for (size_t i = 1; i < microseconds.size(); ++i) {
+        diffs.push_back(microseconds[i] - microseconds[i - 1]);
+    }
+
+    double avgDiffMicro = std::accumulate(diffs.begin(), diffs.end(), 0.0) / diffs.size();
+    double freq = 1e6 / avgDiffMicro;
+    return freq;
 }

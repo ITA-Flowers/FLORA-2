@@ -31,14 +31,15 @@ public:
     int process(void);
 
 private:
-    int countLinesInFile(const std::filesystem::path& filePath) {
+    size_t countLinesInFile(const std::string& filePath) {
         std::ifstream file(filePath);
-        if (!file.is_open()) {
-            std::cerr << "Error: Could not open file: " << filePath << std::endl;
-            return -1;
+        size_t lines = 0;
+        std::string unused;
+
+        while (std::getline(file, unused)) {
+            ++lines;
         }
-        int lines = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
-        file.close();
+
         return lines;
     }
 

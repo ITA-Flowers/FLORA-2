@@ -176,17 +176,9 @@ int NavProcessor::process(void) {
     // Process video frames and log data
     std::cout << "    - processing:" << std::endl;
     cv::Mat frame;
-    int frameCount = 0;
-
-    /*
-     * logLines: number of lines in the log file
-     * gpsLines: number of lines in the GPS file
-     * totalFrames: number of frames in the video file
-     * 
-     * 
-    */
 
     int minSamples = std::min({logLines, gpsLines, totalFrames});
+    int maxSamples = std::max({logLines, gpsLines, totalFrames});
 
     int logFactor   = std::round(static_cast<double>(logLines) / static_cast<double>(minSamples));
     int gpsFactor   = std::round(static_cast<double>(gpsLines) / static_cast<double>(minSamples));
@@ -196,20 +188,32 @@ int NavProcessor::process(void) {
               << "      * video factor: " << videoFactor << "\n"
               << std::endl;
 
-    int logFactorCounter = 0;
-    int gpsFactorCounter = 0;
-    int videoFactorCounter = 0;
+    int frameCount = 0;
+    int logCount = 0;
+    int gpsCount = 0;
 
     std::string line;
+    std::string gpsLine;
 
     std::cout << "\n\n\n\n\n\n\n\n" << std::endl;
-    while (cap.read(frame) && !inFile.eof() && !gpsFile.eof()) {
+    for (int i = 0; i < maxSamples; ++i) {
+        if (i % logFactor == 0 || i == 0) {
+            if (!std::getline(inFile, line)) break;
+            logCount++;
+        }
+
+        if (i % gpsFactor == 0 || i == 0) {
+            if (!std::getline(gpsFile, line)) break;
+            gpsCount++;
+        }
+
+        if (i % videoFactor == 0 || i == 0) {
+            if (!cap.read(frame)) break;
+            frameCount++;
+        }
 
         // -----------------------------------------------------------------------------------------------------
         // * Log file processing
-        std::string line;
-        if (!std::getline(inFile, line)) break;
-
         std::stringstream lineStream(line);
         std::string cell;
         std::vector<std::string> values;
@@ -231,9 +235,6 @@ int NavProcessor::process(void) {
 
         // -----------------------------------------------------------------------------------------------------
         // * GPS file processing
-        std::string gpsLine;
-        if (!std::getline(gpsFile, gpsLine)) break;
-
         std::stringstream gpsLineStream(gpsLine);
         std::string gpsCell;
         std::vector<std::string> gpsValues;
@@ -248,7 +249,6 @@ int NavProcessor::process(void) {
 
         // -----------------------------------------------------------------------------------------------------
         // * Frame processing
-        frameCount++;
         if (!opticalFlowProcessor_.update(frame, alt)) {
             std::cerr << "Error: Optical flow update failed for frame " << frameCount << "." << std::endl;
             continue;
@@ -283,20 +283,22 @@ int NavProcessor::process(void) {
                 << ref_vel_m_s << "\n";
 
         if (frameCount != 1) {
-            std::cout << "\033[9A";
-            for (int i = 0; i < 9; ++i) std::cout << "\033[2K\033[1B";
-            std::cout << "\033[9A";
+            std::cout << "\033[11A";
+            for (int i = 0; i < 11; ++i) std::cout << "\033[2K\033[1B";
+            std::cout << "\033[11A";
         }
         
-        std::cout << "      frame:    " << frameCount << " / " << totalFrames << "\n"
-                << "      speed:    " << speed_mps << " m/s\n"
-                << "      altitude: " << alt << " m\n"
-                << "      heading:  " << heading_deg << " deg\n"
-                << "      dr_lat:   " << gpsData.getLatitude() << "\n"
-                << "      dr_lon:   " << gpsData.getLongitude() << "\n"
-                << "      gps_lat:  " << ref_lat << "\n"
-                << "      gps_lon:  " << ref_lon << "\n"
-                << "      gps_vel:  " << ref_vel_m_s << " m/s\n"
+        std::cout << "      frame:           " << frameCount << " / " << totalFrames << "\n"
+                << "      log_sample:      " << logCount << " / " << logLines << "\n"
+                << "      gps_sample:      " << gpsCount << " / " << gpsLines << "\n"
+                << "      speed:           " << speed_mps << " m/s\n"
+                << "      altitude:        " << alt << " m\n"
+                << "      heading:         " << heading_deg << " deg\n"
+                << "      dr_lat:          " << gpsData.getLatitude() << "\n"
+                << "      dr_lon:          " << gpsData.getLongitude() << "\n"
+                << "      gps_lat:         " << ref_lat << "\n"
+                << "      gps_lon:         " << ref_lon << "\n"
+                << "      gps_vel:         " << ref_vel_m_s << " m/s\n"
                 << std::flush;
     }
 

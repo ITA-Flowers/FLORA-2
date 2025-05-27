@@ -23,5 +23,4 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
 
 add_executable(nav_of_main ${SOURCES})
 
-# 🧠 Linkowanie pełnej biblioteki OpenCV (z CUDA)
 target_link_libraries(nav_of_main ${OpenCV_LIBS})

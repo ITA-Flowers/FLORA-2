@@ -6,7 +6,10 @@ GPSData DeadReckoningProcessor::getGPSData() const {
     return gpsData_;
 }
 
-bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, double headingDeg, double speed, double dt) {
+bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, double heading, double speed, double dt) {
+    const double R = 6378137.0;
+    const double HEADING_CORRECTION_DEG = 90.0;
+
     if (!hasPrevData_) {
         if (initialGpsData.getLatitude() < 1.0 || initialGpsData.getLongitude() < 1.0) {
             std::cerr << "Error: Initial GPS fix is invalid." << std::endl;
@@ -18,30 +21,31 @@ bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, dou
         lastHeading_ = headingDeg;
         lastSpeed_ = speed;
         hasPrevData_ = true;
-        return true;
+    } else {
+        if (altitude <= 0.0) return false;
+
+        double correctedHeading = -heading * 180.0 / M_PI + HEADING_CORRECTION_DEG;
+        double bearingRad = correctedHeading * M_PI / 180.0;
+
+        double distance = speed * dt;
+
+        double lat1 = gpsData_.getLatitude() * M_PI / 180.0;
+        double lon1 = gpsData_.getLongitude() * M_PI / 180.0;
+
+        double lat2 = std::asin(std::sin(lat1) * std::cos(distance / R) +
+                                std::cos(lat1) * std::sin(distance / R) * std::cos(bearingRad));
+
+        double lon2 = lon1 + std::atan2(std::sin(bearingRad) * std::sin(distance / R) * std::cos(lat1),
+                                        std::cos(distance / R) - std::sin(lat1) * std::sin(lat2));
+
+        gpsData_.setLatitude(lat2 * 180.0 / M_PI);
+        gpsData_.setLongitude(lon2 * 180.0 / M_PI);
+
+        lastAltitude_ = altitude;
+        lastHeading_ = heading;
+        lastSpeed_ = speed;
     }
 
-    if (altitude <= 0.0) return false;
-
-    constexpr double RM = 6367449.0;
-    constexpr double RE = 6378137.0; 
-
-    double lat = gpsData_.getLatitude();    
-    double lon = gpsData_.getLongitude();  
-    double distance = speed * dt;        
-    double headingRad = headingDeg * M_PI / 180.0;
-
-    double Ds = (2.0 * M_PI * RM / 360.0) * lat;               
-    double Dd = (2.0 * M_PI * RE / 360.0) * ((90.0 - lat) / 90.0);
-
-    lat += (distance / Ds) * cos(headingRad);
-    lon += (distance / Dd) * sin(headingRad);
-
-    gpsData_.setLatitude(lat);
-    gpsData_.setLongitude(lon);
-    lastAltitude_ = altitude;
-    lastHeading_ = headingDeg;
-    lastSpeed_ = speed;
 
     return true;
 }

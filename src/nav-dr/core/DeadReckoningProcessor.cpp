@@ -18,7 +18,7 @@ bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, dou
 
         gpsData_ = initialGpsData;
         lastAltitude_ = altitude;
-        lastHeading_ = headingDeg;
+        lastHeading_ = heading;
         lastSpeed_ = speed;
         hasPrevData_ = true;
     } else {

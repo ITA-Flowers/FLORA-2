@@ -1,0 +1,17 @@
+networks:
+  px4net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+services:
+  px4:
+    build:
+      context: ./px4_sitl
+    container_name: px4
+    network_mode: "host"
+    stdin_open: true
+    tty: true
+    environment:
+      - PX4_SIM_HOST_ADDR=172.21.32.1

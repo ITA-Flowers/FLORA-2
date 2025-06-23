@@ -217,6 +217,13 @@ git push origin <branch-name>
     - Document why the reversion was necessary
 
 ---
+## Example results
+Trajectory:
+![Obraz 23 06 2025, godz  10 01 (1)](https://github.com/user-attachments/assets/70eb3b70-56ca-49f5-8a05-ef5433b84207)
+
+Velocity
+![Obraz 23 06 2025, godz  10 01](https://github.com/user-attachments/assets/056f3532-90aa-4298-9597-3d56d0692be0)
+
 
 ## Project Status
 

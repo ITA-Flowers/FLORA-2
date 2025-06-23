@@ -1,0 +1,100 @@
+{
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/main/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "Multirotor",
+  "ClockSpeed": 1.0,
+  "ViewMode": "SpringArmChase",
+  "OriginGeopoint": {
+    "Latitude": 47.641468,
+    "Longitude": -122.140165,
+    "Altitude": 122
+  },
+  "TimeOfDay": {
+    "Enabled": true,
+    "StartDateTime": "2022-06-01 12:00:00",
+    "CelestialClockSpeed": 0,
+    "StartDateTimeDst": false
+  },
+  "SubWindows": [
+    {"WindowID": 0, "ImageType": 0, "CameraName": "0", "Visible": true}
+  ],
+  "CameraDefaults": {
+    "CaptureSettings": [
+      {
+        "ImageType": 0,
+        "Width": 320,
+        "Height": 240,
+        "FOV_Degrees": 90,
+        "AutoExposureSpeed": 100,
+        "AutoExposureBias": 0,
+        "AutoExposureMaxBrightness": 0.64,
+        "AutoExposureMinBrightness": 0.03,
+        "MotionBlurAmount": 0,
+        "TargetGamma": 1.0,
+        "ProjectionMode": "",
+        "OrthoWidth": 5.12
+      }
+    ],
+    "Gimbal": {
+      "Stabilization": 0.8,
+      "Pitch": -90,
+      "Roll": 0,
+      "Yaw": 0
+    }
+  },
+  "Vehicles": {
+    "SimpleFlight": {
+      "VehicleType": "SimpleFlight",
+      "Sensors": {
+        "Gimbal": {
+          "SensorType": 2,
+          "Enabled": true,
+          "Pitch": 90.0, "Roll": 0.0, "Yaw": 0.0
+        },
+        "Imu": {
+          "SensorType": 2,
+          "Enabled": true,
+          "PitchOffset": 0,
+          "EnabledFor": ["PX4"],
+          "UpdateFrequency": 100
+        },
+        "Gps": {
+          "SensorType": 3,
+          "Enabled": true,
+          "EnabledFor": ["PX4"],
+          "UpdateFrequency": 10
+        },
+        "Barometer": {
+          "SensorType": 1,
+          "Enabled": true,
+          "EnabledFor": ["PX4"],
+          "UpdateFrequency": 50
+        }
+      },
+      "Cameras": {
+        "0": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 1280,
+              "Height": 720,
+              "FOV_Degrees": 90,
+              "AutoExposureSpeed": 100,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0
+            }
+          ],
+          "X": 0.0, "Y": 0.0, "Z": 0.5,
+          "Pitch": 90.0, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "X": 0, "Y": 0, "Z": 0,
+      "Pitch": 0, "Roll": 0, "Yaw": 0
+    }
+  },
+  "PhysicsEngineName": "FastPhysicsEngine",
+  "EngineSound": false
+}

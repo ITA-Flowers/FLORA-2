@@ -3,6 +3,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 import os
+import numpy as np
+
+from math import radians, sin, cos, sqrt, atan2
+
+def haversine(lat1, lon1, lat2, lon2):
+    # Ziemia w metrach
+    R = 6371000.0
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat / 2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
 
 if len(sys.argv) < 2:
     print("Usage: python plot_gps_heading.py <csv_filepath>")
@@ -36,9 +48,49 @@ agg = df.groupby("time_100ms").agg({
     "gps_vel": "mean"
 }).reset_index()
 
+# --- Error metrics: position ---
+position_errors = agg.apply(lambda row: haversine(row["gps_lat"], row["gps_lon"], row["dr_lat"], row["dr_lon"]), axis=1)
+pos_mae = position_errors.mean()
+pos_rmse = np.sqrt((position_errors ** 2).mean())
+pos_max = position_errors.max()
+
+# --- Error metrics: velocity ---
+velocity_errors = (agg["gps_vel"] - agg["speed_mps"]).abs()
+vel_mae = velocity_errors.mean()
+vel_rmse = np.sqrt(((agg["gps_vel"] - agg["speed_mps"]) ** 2).mean())
+vel_max = velocity_errors.max()
+
+# Print metrics
+print("\n=== Error Summary ===")
+print(f"Position error [meters]:")
+print(f"  MAE   = {pos_mae:.2f} m")
+print(f"  RMSE  = {pos_rmse:.2f} m")
+print(f"  Max   = {pos_max:.2f} m")
+
+print(f"\nVelocity error [m/s]:")
+print(f"  MAE   = {vel_mae:.2f} m/s")
+print(f"  RMSE  = {vel_rmse:.2f} m/s")
+print(f"  Max   = {vel_max:.2f} m/s\n")
+
+# Save to file
 basename = os.path.splitext(os.path.basename(csv_path))[0]
 out_dir = os.path.dirname(csv_path)
 
+report_path = os.path.join(out_dir, f"{basename}_error_report.txt")
+with open(report_path, "w") as f:
+    f.write("=== Error Summary ===\n")
+    f.write("Position error [meters]:\n")
+    f.write(f"  MAE   = {pos_mae:.2f} m\n")
+    f.write(f"  RMSE  = {pos_rmse:.2f} m\n")
+    f.write(f"  Max   = {pos_max:.2f} m\n\n")
+    f.write("Velocity error [m/s]:\n")
+    f.write(f"  MAE   = {vel_mae:.2f} m/s\n")
+    f.write(f"  RMSE  = {vel_rmse:.2f} m/s\n")
+    f.write(f"  Max   = {vel_max:.2f} m/s\n")
+
+print(f"[INFO] Error report saved as: {report_path}")
+
+# --- Plotting ---
 # 1. Trajectory plot
 plt.figure(figsize=(10, 6))
 plt.plot(agg["dr_lon"], agg["dr_lat"], label="Estimated trajectory (GNSS-free navigation)", linestyle='--', linewidth=1)
@@ -67,7 +119,7 @@ ax2.set_ylabel("Speed [m/s]", color="tab:blue")
 ax2.tick_params(axis='y', labelcolor="tab:blue")
 
 ax1.set_xlabel("Time [×100ms]")
-ax1.set_title("Heading i Speed (OF) w czasie")
+ax1.set_title("Heading and Speed (OF) over Time")
 ax1.grid(True)
 plt.tight_layout()
 hs_path = os.path.join(out_dir, f"{basename}_heading_speed.png")

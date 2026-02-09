@@ -1,6 +1,9 @@
 # IDE
 .vscode
 
+# Zipy
+.zip
+
 # Build directories
 build/
 build-*/

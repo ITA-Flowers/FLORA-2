@@ -26,6 +26,7 @@ add_library(flora_core
     core/types/Quaternion.cpp
     core/types/Matrix.cpp
     core/NavProcessor.cpp
+    core/TerrainProvider.cpp
 )
 
 target_include_directories(flora_core

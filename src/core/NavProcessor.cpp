@@ -1,4 +1,7 @@
 #include "NavProcessor.hpp"
+#include <algorithm>
+#include <chrono>
+#include <iomanip>
 
 int NavProcessor::initInput(const std::filesystem::path& inputDir) {
     std::string dirStr = inputDir.string();
@@ -36,6 +39,12 @@ int NavProcessor::initInput(const std::filesystem::path& inputDir) {
     if (!std::filesystem::exists(inputVideoFile_)) {
         std::cerr << "Error: Input video file does not exist: " << inputVideoFile_ << std::endl;
         return -1;
+    }
+
+    const bool nmtLoaded = nmtProvider_.load("terrain_model/NMT.tiff");
+    const bool nmptLoaded = nmptProvider_.load("terrain_model/NMPT.tiff");
+    if (!nmtLoaded || !nmptLoaded) {
+        std::cout << "Warning: Terrain maps unavailable, OF scaling will use local altitude only." << std::endl;
     }
 
     return 0;
@@ -172,7 +181,8 @@ int NavProcessor::process(void) {
     std::cout << "    - writing header to output file." << std::endl;
     std::cout << std::fixed << std::setprecision(10);
     outFile << std::fixed << std::setprecision(10);
-    outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon,gps_vel\n";
+    outFile << "frame_number,speed_mps,altitude,heading,dr_lat,dr_lon,gps_lat,gps_lon,gps_vel,"
+            << "dr_east,dr_north,dr_up,agl_used,agl_ground,agl_surface,terrain_model\n";
     std::cout << "      * header written successfully." << std::endl;
 
     // Process video frames and log data
@@ -263,9 +273,62 @@ int NavProcessor::process(void) {
         double ref_lon = std::stoi(gpsValues[gpsColumnIndex["lon"]]) / 1e7;
         double ref_vel_m_s = std::stod(gpsValues[gpsColumnIndex["vel_m_s"]]);
 
+        if (!terrainOriginInitialized_ && nmtProvider_.isLoaded() && nmptProvider_.isLoaded()) {
+            const bool gotGround0 = nmtProvider_.sampleLatLon(ref_lat, ref_lon, hGround0_);
+            const bool gotSurface0 = nmptProvider_.sampleLatLon(ref_lat, ref_lon, hSurface0_);
+            if (gotGround0 && gotSurface0) {
+                terrainOriginInitialized_ = true;
+            }
+        }
+
+        double aglGround = alt;
+        double aglSurface = alt;
+        double aglUsed = alt;
+        std::string terrainModel = "alt_only";
+        GPSData drGpsBeforeUpdate = deadReckoningProcessor_.getGPSData();
+
+        if (deadReckoningProcessor_.hasPreviousData() &&
+            nmtProvider_.isLoaded() && nmptProvider_.isLoaded()) {
+            double hGround = 0.0;
+            double hSurface = 0.0;
+            const bool gotGround = nmtProvider_.sampleLatLon(
+                drGpsBeforeUpdate.getLatitude(), drGpsBeforeUpdate.getLongitude(), hGround);
+            const bool gotSurface = nmptProvider_.sampleLatLon(
+                drGpsBeforeUpdate.getLatitude(), drGpsBeforeUpdate.getLongitude(), hSurface);
+
+            if (gotGround && gotSurface) {
+                const double deltaGround = terrainOriginInitialized_ ? (hGround - hGround0_) : 0.0;
+                const double deltaSurface = terrainOriginInitialized_ ? (hSurface - hSurface0_) : 0.0;
+                aglGround = std::max(1.0, alt - deltaGround);
+                aglSurface = std::max(1.0, alt - deltaSurface);
+
+                bool chooseSurface = preferSurface_;
+                if (hasLastSelectedAgl_) {
+                    const double groundResidual = std::abs(aglGround - lastSelectedAgl_);
+                    const double surfaceResidual = std::abs(aglSurface - lastSelectedAgl_);
+                    chooseSurface = (surfaceResidual <= groundResidual);
+                }
+
+                if (chooseSurface != preferSurface_) {
+                    terrainSwitchDebounce_++;
+                    if (terrainSwitchDebounce_ >= 5) {
+                        preferSurface_ = chooseSurface;
+                        terrainSwitchDebounce_ = 0;
+                    }
+                } else {
+                    terrainSwitchDebounce_ = 0;
+                }
+
+                aglUsed = preferSurface_ ? aglSurface : aglGround;
+                terrainModel = preferSurface_ ? "surface" : "ground";
+                lastSelectedAgl_ = aglUsed;
+                hasLastSelectedAgl_ = true;
+            }
+        }
+
         // -----------------------------------------------------------------------------------------------------
         // * Frame processing
-        if (!opticalFlowProcessor_.update(frame, alt)) {
+        if (!opticalFlowProcessor_.update(frame, aglUsed)) {
             std::cerr << "Error: Optical flow update failed for frame " << frameCount << "." << std::endl;
             continue;
         }
@@ -288,6 +351,7 @@ int NavProcessor::process(void) {
         // * Get dead reckoning GPS data and write to output file
         // ? Hint: headers: frame_number | speed_mps | altitude | heading | dr_lat | dr_lon | gps_lat | gps_lon
         GPSData gpsData = deadReckoningProcessor_.getGPSData();
+        Vector3D enuData = deadReckoningProcessor_.getENUPosition();
         outFile << frameCount << ","
                 << speed_mps << ","
                 << alt << ","
@@ -296,7 +360,14 @@ int NavProcessor::process(void) {
                 << gpsData.getLongitude() << ","
                 << ref_lat << ","
                 << ref_lon << ","
-                << ref_vel_m_s << "\n";
+                << ref_vel_m_s << ","
+                << enuData.getX() << ","
+                << enuData.getY() << ","
+                << enuData.getZ() << ","
+                << aglUsed << ","
+                << aglGround << ","
+                << aglSurface << ","
+                << terrainModel << "\n";
 
         if (frameCount != 1) {
             std::cout << "\033[11A";
@@ -312,9 +383,13 @@ int NavProcessor::process(void) {
                 << "      heading:         " << heading_deg << " deg\n"
                 << "      dr_lat:          " << gpsData.getLatitude() << "\n"
                 << "      dr_lon:          " << gpsData.getLongitude() << "\n"
+                << "      dr_east:         " << enuData.getX() << " m\n"
+                << "      dr_north:        " << enuData.getY() << " m\n"
+                << "      dr_up:           " << enuData.getZ() << " m\n"
                 << "      gps_lat:         " << ref_lat << "\n"
                 << "      gps_lon:         " << ref_lon << "\n"
                 << "      gps_vel:         " << ref_vel_m_s << " m/s\n"
+                << "      agl_used:        " << aglUsed << " m (" << terrainModel << ")\n"
                 << std::flush;
     }
 

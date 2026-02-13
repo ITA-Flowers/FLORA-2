@@ -1,8 +1,6 @@
 #include "farneback_gpu.hpp"
-#include <opencv2/cudaoptflow.hpp>
-#include <opencv2/cudaarithm.hpp>
-#include <opencv2/cudawarping.hpp>
-#include <opencv2/core/cuda.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/video.hpp>
 #include <cmath>
 
 #ifndef M_PI
@@ -27,24 +25,28 @@ float computeFarnebackGpuMagnitude(const cv::Mat& prevFrame, const cv::Mat& curr
     else
         currGray = currSmall;
 
-    cv::cuda::GpuMat d_prev(prevGray);
-    cv::cuda::GpuMat d_curr(currGray);
-
-    auto fb = cv::cuda::FarnebackOpticalFlow::create(
-        5, 0.5, false, 13, 3, 5, 1.1, 0
+    cv::Mat flow;
+    cv::calcOpticalFlowFarneback(
+        prevGray,
+        currGray,
+        flow,
+        0.5,
+        5,
+        13,
+        3,
+        5,
+        1.1,
+        0
     );
 
-    cv::cuda::GpuMat flowGpu;
-    fb->calc(d_prev, d_curr, flowGpu);
+    std::vector<cv::Mat> flowChannels(2);
+    cv::split(flow, flowChannels);
 
-    std::vector<cv::cuda::GpuMat> flowChannels(2);
-    cv::cuda::split(flowGpu, flowChannels);
+    cv::Mat magnitude;
+    cv::magnitude(flowChannels[0], flowChannels[1], magnitude);
 
-    cv::cuda::GpuMat magnitudeGpu;
-    cv::cuda::magnitude(flowChannels[0], flowChannels[1], magnitudeGpu);
-
-    cv::Scalar sumMag = cv::cuda::sum(magnitudeGpu);
-    float averageMag = static_cast<float>(sumMag[0]) / (magnitudeGpu.rows * magnitudeGpu.cols);
+    cv::Scalar sumMag = cv::sum(magnitude);
+    float averageMag = static_cast<float>(sumMag[0]) / (magnitude.rows * magnitude.cols);
 
     return averageMag;
 }

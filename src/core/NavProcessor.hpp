@@ -12,6 +12,7 @@
 
 #include "../nav-dr/core/DeadReckoningProcessor.hpp"
 #include "../nav-of/core/OpticalFlowProcessor.hpp"
+#include "TerrainProvider.hpp"
 
 class NavProcessor {
 public:
@@ -48,6 +49,16 @@ private:
 
     OpticalFlowProcessor opticalFlowProcessor_;
     DeadReckoningProcessor deadReckoningProcessor_;
+    TerrainProvider nmtProvider_;
+    TerrainProvider nmptProvider_;
+
+    bool terrainOriginInitialized_ = false;
+    double hGround0_ = 0.0;
+    double hSurface0_ = 0.0;
+    double lastSelectedAgl_ = 0.0;
+    bool hasLastSelectedAgl_ = false;
+    bool preferSurface_ = true;
+    int terrainSwitchDebounce_ = 0;
 
     std::string fileBasename_;
     std::filesystem::path inputLogFile_;

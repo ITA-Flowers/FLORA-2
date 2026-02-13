@@ -44,17 +44,20 @@ The project primarily uses the [**AirSim**](https://github.com/microsoft/AirSim)
 
 ## Requirements
 
+Only requirements needed to compile the C++ code are listed below. The build does **not** auto-download any libraries; dependencies must be installed locally (or provided in the repository as noted).
+
 |Requirement|Version|
 |-|-|
-|*[AirSim](https://github.com/microsoft/AirSim)* with **Unreal Engine**|4.27|
-|**C++ compiler**|17|
-|**CMake**| 3.12+|
-|**OpenCV**| 4.9.0|
-|**Eigen**| 3.3+|
-|**Boost**| 1.65+|
-|**Python**| 3.9|
+|**C++ compiler** (GCC/Clang/MSVC)|C++17|
+|**CMake**|3.15+|
+|**Build tool**|Make or Ninja|
+|**OpenCV** (when `USE_OPENCV=ON`)|4.x|
+|**Eigen** (when `USE_EIGEN3=ON`)|3.3+ or bundled headers|
+|**GoogleTest** (when `BUILD_TESTS=ON`)|Any recent 1.12+|
 
-Additional dependencies will be listed in `CMakeLists.txt`
+Notes:
+- If you prefer not to install Eigen, you can place headers under `include/external/eigen` and keep `USE_EIGEN3=ON`.
+- To build without OpenCV, configure with `-DUSE_OPENCV=OFF`.
 
 ## Building
 
@@ -90,14 +93,16 @@ The following CMake options are available:
 
 - `BUILD_TESTS=ON/OFF` - Build unit and integration tests (default: ON)
 
-- `USE_EIGEN=ON/OFF` - Fetch Eigen3 library if needed (default: ON)
+- `USE_EIGEN3=ON/OFF` - Use Eigen3 headers (system or bundled) (default: ON)
+
+- `USE_OPENCV=ON/OFF` - Use OpenCV (default: ON)
 
 - `ENABLE_WARNINGS=ON/OFF` - Enable all warning (default: ON)
 
 Example:
 
 ``` bash
-cmake -DBUILD_TESTS=ON -DUSE_EIGEN=OFF ..
+cmake -DBUILD_TESTS=ON -DUSE_EIGEN3=OFF -DUSE_OPENCV=OFF ..
 ```
 
 ### Resetting the Build Configuration

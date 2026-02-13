@@ -7,7 +7,6 @@ GPSData DeadReckoningProcessor::getGPSData() const {
 }
 
 bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, double heading, double speed, double dt) {
-    const double R = 6378137.0;
     const double HEADING_CORRECTION_DEG = 90.0;
 
     if (!hasPrevData_) {
@@ -16,7 +15,9 @@ bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, dou
             return false;
         }
 
-        gpsData_ = initialGpsData;
+        originGpsData_ = initialGpsData;
+        gpsData_ = originGpsData_;
+        enuPosition_ = Vector3D(0.0, 0.0, 0.0);
         lastAltitude_ = altitude;
         lastHeading_ = heading;
         lastSpeed_ = speed;
@@ -25,21 +26,23 @@ bool DeadReckoningProcessor::update(GPSData initialGpsData, double altitude, dou
         if (altitude <= 0.0) return false;
 
         double correctedHeading = -heading * 180.0 / M_PI + HEADING_CORRECTION_DEG;
-        double bearingRad = correctedHeading * M_PI / 180.0;
+        double bearingRad = correctedHeading * M_PI / 180.0; // [rad], clockwise from North
 
         double distance = speed * dt;
+        double dEast = distance * std::sin(bearingRad);
+        double dNorth = distance * std::cos(bearingRad);
+        double dUp = altitude - lastAltitude_;
 
-        double lat1 = gpsData_.getLatitude() * M_PI / 180.0;
-        double lon1 = gpsData_.getLongitude() * M_PI / 180.0;
+        enuPosition_.setX(enuPosition_.getX() + dEast);
+        enuPosition_.setY(enuPosition_.getY() + dNorth);
+        enuPosition_.setZ(enuPosition_.getZ() + dUp);
 
-        double lat2 = std::asin(std::sin(lat1) * std::cos(distance / R) +
-                                std::cos(lat1) * std::sin(distance / R) * std::cos(bearingRad));
-
-        double lon2 = lon1 + std::atan2(std::sin(bearingRad) * std::sin(distance / R) * std::cos(lat1),
-                                        std::cos(distance / R) - std::sin(lat1) * std::sin(lat2));
-
-        gpsData_.setLatitude(lat2 * 180.0 / M_PI);
-        gpsData_.setLongitude(lon2 * 180.0 / M_PI);
+        gpsData_.fromENU(
+            enuPosition_,
+            originGpsData_.getLatitude(),
+            originGpsData_.getLongitude(),
+            originGpsData_.getAltitude());
+        gpsData_.setAltitude(originGpsData_.getAltitude() + enuPosition_.getZ());
 
         lastAltitude_ = altitude;
         lastHeading_ = heading;

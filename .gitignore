@@ -53,3 +53,6 @@ venv-py39/
 *.exe
 *.out
 *.app
+
+# terrain model
+terrain_model/
